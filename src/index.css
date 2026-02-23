@@ -1,0 +1,139 @@
+@import "tailwindcss";
+
+/* ── Custom theme tokens ── */
+@theme {
+  --color-bg-page: #1a1a2e;
+  --color-bg-card: #22223a;
+  --color-bg-card-hover: #2a2a40;
+  --color-bg-sidebar: #1e1e32;
+  --color-border-subtle: #2e2e45;
+
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: #8888a0;
+  --color-text-muted: #6b6b80;
+
+  --color-accent-green: #4ade80;
+  --color-accent-green-dim: #22c55e;
+  --color-accent-green-bg: #16253a;
+  --color-accent-red: #ef4444;
+  --color-accent-red-bg: #2a1a1a;
+  --color-accent-gray-bg: #2e2e3e;
+
+  /* Donut / account-dot palette */
+  --color-dot-0: #4ade80;
+  --color-dot-1: #22d3ee;
+  --color-dot-2: #60a5fa;
+  --color-dot-3: #fb923c;
+  --color-dot-4: #a78bfa;
+  --color-dot-5: #facc15;
+
+  /* Neutral overlays */
+  --color-overlay-xxs: rgba(255, 255, 255, 0.02);
+  --color-overlay-xxs-strong: rgba(255, 255, 255, 0.03);
+  --color-overlay-xs: rgba(255, 255, 255, 0.04);
+  --color-overlay-xs-strong: rgba(255, 255, 255, 0.05);
+  --color-overlay-sm: rgba(255, 255, 255, 0.06);
+  --color-overlay-md: rgba(255, 255, 255, 0.08);
+  --color-overlay-md-strong: rgba(255, 255, 255, 0.1);
+  --color-overlay-lg: rgba(255, 255, 255, 0.12);
+  --color-overlay-xl: rgba(255, 255, 255, 0.16);
+  --color-overlay-xxl: rgba(255, 255, 255, 0.2);
+  --color-overlay-xxxl: rgba(255, 255, 255, 0.24);
+
+}
+
+/* ── Base layer overrides ── */
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+  body {
+    background-color: var(--color-bg-page);
+    color: var(--color-text-primary);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+  /* Scrollbar styling for the dark theme */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-page);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border-subtle);
+    border-radius: 3px;
+  }
+}
+
+/* ── Utility classes used throughout ── */
+@layer utilities {
+  .card {
+    background-color: var(--color-bg-card);
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .text-primary {
+    color: var(--color-text-primary);
+  }
+  .text-secondary {
+    color: var(--color-text-secondary);
+  }
+  .text-muted {
+    color: var(--color-text-muted);
+  }
+  .text-green {
+    color: var(--color-accent-green);
+  }
+  .text-red {
+    color: var(--color-accent-red);
+  }
+
+  .badge-green {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-accent-green-bg);
+    color: var(--color-accent-green);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+  .badge-red {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-accent-red-bg);
+    color: var(--color-accent-red);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+  .badge-gray {
+    display: inline-flex;
+    align-items: center;
+    background-color: var(--color-accent-gray-bg);
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 12px;
+  }
+
+  .button {
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.06);
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+  }
+}
+
+
+.primary-progress-bar {
+  background-color: var(--color-accent-green);
+}
