@@ -58,10 +58,10 @@ export default function Accounts() {
       <div className="flex gap-6">
         <div style={{ flex: '1 1 60%', minWidth: 0 }}>
           {/* You can pass accounts data to charts too! */}
-          <EquitySummaryChart data={accounts} />
+          <EquitySummaryChart />
         </div>
         <div style={{ flex: '1 1 40%', minWidth: 0 }}>
-          <AccountsDistribution data={accounts} />
+          <AccountsDistribution />
         </div>
       </div>
 
@@ -78,15 +78,34 @@ export default function Accounts() {
         onAddAccount={() => setAddAccountOpen(true)}
       />
 
-      <AccountsTable data={accounts?.data} />
+      <AccountsTable data={accounts} />
     </div>
   )
 }
 
-function useAccounts () {
+function useAccounts() {
   return useQuery({
     queryKey: ['accounts'],
     queryFn: getAccounts,
-    staleTime: 1000 * 60 * 5, // 5 minutes as requested
+    staleTime: 1000 * 60 * 5,
+    // Transform the data here so the component always gets the right shape
+    select: (response) => {
+      const rawData = response?.data || [];
+      return rawData.map((row: any) => ({
+        id: row.id,
+        name: row.exchange_title?.toUpperCase() || 'Unknown',
+        subName: row.exchange_user_id || 'N/A',
+        value: Number(row.value) || 0,
+        // Provide defaults for missing backend fields to prevent .toFixed() crashes
+        change1D: Number(row.change1D) || 0,
+        change7D: Number(row.change7D) || 0,
+        change30D: Number(row.change30D) || 0,
+        autotraderCount: Number(row.autotraderCount) || 0,
+        market: row.market_type || 'spot',
+        provider: row.exchange_title || 'gate',
+        autotrader: row.autotraderCount > 0 ? 'Active' : 'None',
+        assets: row.assets || [{ color: '#4ade80', pct: 100 }], // Default bar
+      }));
+    },
   });
-};
+}

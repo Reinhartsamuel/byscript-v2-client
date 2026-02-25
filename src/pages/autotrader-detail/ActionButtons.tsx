@@ -1,4 +1,4 @@
-export default function ActionButtons() {
+export default function ActionButtons({ onDelete }: { onDelete?: () => void }) {
   return (
     <div className="flex gap-3">
       {/* Stop */}
@@ -31,6 +31,19 @@ export default function ActionButtons() {
         }}
       >
         Close All Positions
+      </button>
+
+      {/* Delete Autotrader */}
+      <button
+        onClick={onDelete}
+        className="text-sm font-medium px-4 py-2 rounded-lg transition-colors ml-auto"
+        style={{
+          backgroundColor: 'transparent',
+          border: '1px solid var(--color-accent-red)',
+          color: 'var(--color-accent-red)',
+        }}
+      >
+        Delete
       </button>
     </div>
   )

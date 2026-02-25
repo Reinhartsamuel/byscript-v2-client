@@ -10,8 +10,11 @@ const DOT_COLORS = ['#4ade80', '#22d3ee', '#60a5fa', '#fb923c', '#a78bfa', '#fac
 export default function AccountsSummary({ data }: { data: AccountSummaryItem[] }) {
   const navigate = useNavigate()
 
-  const accounts = data.map((a, i) => ({
-    ...a,
+  const accounts = data.map((a: any, i) => ({
+    id: a.id ?? a.exchange_id ?? String(i),
+    name: a.name ?? a.exchange_title ?? 'Unknown',
+    value: Number(a.value ?? a.balance ?? 0),
+    percentage: a.percentage ?? 0,
     color: a.color ?? DOT_COLORS[i % DOT_COLORS.length],
   }))
 

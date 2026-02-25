@@ -1,65 +1,139 @@
 import { useState } from 'react'
-import { Copy } from 'lucide-react'
+import { Copy, Check, Link } from 'lucide-react'
+import { AutotraderDetailData } from '@/data/mockData'
 
-export default function JsonPayload() {
-  const [selectedAction, setSelectedAction] = useState('')
+const ACTIONS = ['BUY', 'SELL', 'CLOSE', 'CANCEL'] as const
+type Action = (typeof ACTIONS)[number]
 
-  const handleCopy = () => {
-    const payload = {
+const WEBHOOK_URL = 'https://api.byscript.io/webhook/tv/abc123xyz'
+
+interface JsonPayloadProps {
+  data: AutotraderDetailData
+}
+
+export default function JsonPayload({ data }: JsonPayloadProps) {
+  const [selectedAction, setSelectedAction] = useState<Action>('BUY')
+  const [copied, setCopied] = useState(false)
+  const [urlCopied, setUrlCopied] = useState(false)
+
+  const payload = JSON.stringify(
+    {
       action: selectedAction,
       timestamp: new Date().toISOString(),
       strategy: 'Grid Cuentrus',
-    }
-    navigator.clipboard.writeText(JSON.stringify(payload, null, 2))
+    },
+    null,
+    2
+  )
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(payload)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  const handleCopyUrl = () => {
+    navigator.clipboard.writeText(WEBHOOK_URL)
+    setUrlCopied(true)
+    setTimeout(() => setUrlCopied(false), 2000)
   }
 
   return (
     <div className="card">
       <p className="text-muted text-xs uppercase tracking-wide mb-4">JSON Payload Messages</p>
 
-      {/* Label */}
-      <label className="text-muted text-xs block mb-2">Trading View sent Action</label>
-
-      {/* Dropdown */}
-      <div className="flex flex-col gap-2 relative mb-4">
-        <select
-          value={selectedAction}
-          onChange={(e) => setSelectedAction(e.target.value)}
-          className="text-primary text-sm bg-transparent border-b border-solid pr-6"
-          style={{ borderColor: 'var(--color-border-subtle)', outline: 'none', appearance: 'none' }}
-        >
-          <option value="" style={{ backgroundColor: '#22223a', color: '#f0f0f0' }}>
-            Select TradingView alert action to generate payload
-          </option>
-          <option value="BUY" style={{ backgroundColor: '#22223a', color: '#f0f0f0' }}>
-            Buy
-          </option>
-          <option value="SELL" style={{ backgroundColor: '#22223a', color: '#f0f0f0' }}>
-            Sell
-          </option>
-          <option value="CLOSE" style={{ backgroundColor: '#22223a', color: '#f0f0f0' }}>
-            Close
-          </option>
-          <option value="CANCEL" style={{ backgroundColor: '#22223a', color: '#f0f0f0' }}>
-            Cancel
-          </option>
-        </select>
+      {/* Webhook URL */}
+      <label className="text-muted text-xs block mb-2">Webhook URL</label>
+      <div
+        className="mb-4"
+        style={{
+          backgroundColor: 'var(--color-bg-base)',
+          border: '1px solid var(--color-border-subtle)',
+          borderRadius: '8px',
+          padding: '12px 16px',
+          fontFamily: 'monospace',
+        }}
+      >
+        <span className="text-sm" style={{ color: 'var(--color-text-primary)', wordBreak: 'break-all' }}>
+          {WEBHOOK_URL}
+        </span>
       </div>
+      <button
+        onClick={handleCopyUrl}
+        className="flex items-center justify-center gap-2 text-sm font-semibold w-full cursor-pointer transition-colors mb-6"
+        style={{
+          backgroundColor: urlCopied
+            ? 'var(--color-accent-green-dim)'
+            : 'var(--color-accent-green)',
+          color: '#000',
+          padding: '10px 0',
+          borderRadius: '8px',
+          border: 'none',
+        }}
+      >
+        {urlCopied ? <Check size={16} /> : <Link size={16} />}
+        {urlCopied ? 'Copied!' : 'Copy Webhook URL'}
+      </button>
+
+      {/* Action buttons */}
+      <label className="text-muted text-xs block mb-2">Trading View sent Action</label>
+      <div className="flex gap-2 mb-4">
+        {ACTIONS.map((action) => (
+          <button
+            key={action}
+            onClick={() => setSelectedAction(action)}
+            className="flex-1 text-xs font-medium py-2 rounded-lg cursor-pointer transition-colors"
+            style={{
+              backgroundColor:
+                action === selectedAction ? 'var(--color-accent-green-bg)' : 'transparent',
+              color:
+                action === selectedAction
+                  ? 'var(--color-accent-green)'
+                  : 'var(--color-text-secondary)',
+              border:
+                action === selectedAction
+                  ? '1px solid var(--color-accent-green)'
+                  : '1px solid var(--color-border-subtle)',
+            }}
+          >
+            {action}
+          </button>
+        ))}
+      </div>
+
+      {/* JSON code block */}
+      <pre
+        className="text-sm mb-4"
+        style={{
+          backgroundColor: 'var(--color-bg-base)',
+          border: '1px solid var(--color-border-subtle)',
+          borderRadius: '8px',
+          padding: '16px',
+          overflowX: 'auto',
+          color: 'var(--color-accent-green)',
+          fontFamily: 'monospace',
+        }}
+      >
+        {payload}
+      </pre>
 
       {/* Copy button */}
       <button
         onClick={handleCopy}
-        disabled={!selectedAction}
-        className="flex items-center gap-2 text-green text-xs cursor-pointer hover:text-primary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex items-center justify-center gap-2 text-sm font-semibold w-full cursor-pointer transition-colors"
+        style={{
+          backgroundColor: copied
+            ? 'var(--color-accent-green-dim)'
+            : 'var(--color-accent-green)',
+          color: '#000',
+          padding: '10px 0',
+          borderRadius: '8px',
+          border: 'none',
+        }}
       >
-        <Copy size={14} />
-        Copy JSON
+        {copied ? <Check size={16} /> : <Copy size={16} />}
+        {copied ? 'Copied!' : 'Copy Payload'}
       </button>
-
-      {/* Instruction text */}
-      <p className="text-muted text-xs mt-3">
-        Select an action to generate the JSON payload for TradingView webhooks
-      </p>
     </div>
   )
 }

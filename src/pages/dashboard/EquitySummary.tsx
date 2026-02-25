@@ -19,7 +19,7 @@ type TimeTab = typeof TIME_TABS[number]
 export default function EquitySummary({ data }: { data: EquitySummaryData }) {
   const [activeTab, setActiveTab] = useState<TimeTab>('7D')
 
-  const chartSource = data.chart
+  const chartSource = data?.chart ?? []
 
   const peakIndex = useMemo(() => {
     let max = -Infinity, idx = 0
@@ -115,7 +115,7 @@ export default function EquitySummary({ data }: { data: EquitySummaryData }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-baseline gap-3">
           <span className="text-primary text-2xl font-bold">
-            ${data.total_balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+            ${(data?.total_balance ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
         </div>
 

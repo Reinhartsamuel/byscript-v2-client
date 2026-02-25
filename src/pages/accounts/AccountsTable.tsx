@@ -2,19 +2,20 @@ import { useState, useEffect } from 'react'
 import { AccountTableRow } from '@/data/mockData'
 
 interface AccountsTableProps {
-  data: AccountTableRow[]
+  data?: AccountTableRow[] // Make optional
 }
 
 export default function AccountsTable({ data }: AccountsTableProps) {
+  const safeData = data || [];
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
   useEffect(() => {
     setCurrentPage(1)
-  }, [data])
+  }, [safeData])
 
-  const totalPages = Math.ceil(data.length / rowsPerPage)
-  const paginatedData = data.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+  const totalPages = Math.ceil(safeData.length / rowsPerPage)
+  const paginatedData = safeData.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
 
   return (
     <div className="card">
@@ -57,7 +58,7 @@ export default function AccountsTable({ data }: AccountsTableProps) {
               className={`text-xs text-right ${row.change1D >= 0 ? 'text-green' : 'text-red'}`}
             >
               {row.change1D >= 0 ? '+' : ''}
-              {row.change1D.toFixed(1)}%
+              {(Number(row.change1D) || 0).toFixed(1)}%
             </span>
 
             {/* 7D */}
@@ -65,7 +66,7 @@ export default function AccountsTable({ data }: AccountsTableProps) {
               className={`text-xs text-right ${row.change7D >= 0 ? 'text-green' : 'text-red'}`}
             >
               {row.change7D >= 0 ? '+' : ''}
-              {row.change7D.toFixed(1)}%
+              {(Number(row.change7D) || 0).toFixed(1)}%
             </span>
 
             {/* 30D */}
@@ -73,7 +74,7 @@ export default function AccountsTable({ data }: AccountsTableProps) {
               className={`text-xs text-right ${row.change30D >= 0 ? 'text-green' : 'text-red'}`}
             >
               {row.change30D >= 0 ? '+' : ''}
-              {row.change30D.toFixed(1)}%
+              {(Number(row.change30D) || 0).toFixed(1)}%
             </span>
 
             {/* Autotraders */}

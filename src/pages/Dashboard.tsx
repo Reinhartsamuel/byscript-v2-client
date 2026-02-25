@@ -90,7 +90,7 @@ export default function Dashboard() {
         const userId = JSON.parse(localStorage.getItem('user') || '{}').id
         const res = await fetch(`${BASE_URL}/user/dashboard?user_id=${userId}&period=7D`)
         const json = await res.json()
-        setData(json)
+        setData({ ...EMPTY_DASHBOARD, ...json })
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
       }
