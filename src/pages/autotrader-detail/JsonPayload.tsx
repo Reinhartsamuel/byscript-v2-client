@@ -11,7 +11,7 @@ interface JsonPayloadProps {
   data: AutotraderDetailData
 }
 
-export default function JsonPayload({ data }: JsonPayloadProps) {
+export default function JsonPayload({ data: _data }: JsonPayloadProps) {
   const [selectedAction, setSelectedAction] = useState<Action>('BUY')
   const [copied, setCopied] = useState(false)
   const [urlCopied, setUrlCopied] = useState(false)

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { X, Loader2 } from 'lucide-react'
+import { X, Loader2, Copy, Check } from 'lucide-react'
 import { registerExchangeAccount } from '@/lib/api'
-import { Bounce, ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import { darkToast } from './DarkToast';
 const EXCHANGES = ['Gate', 'OKX', 'Hyperliquid']
 
@@ -16,6 +16,15 @@ export default function AddAccountModal({ open, onClose }: AddAccountModalProps)
   const [apiSecret, setApiSecret] = useState('')
   const [passphrase, setPassphrase] = useState('')
   const [loading, setLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const WHITELIST_IPS = '198.51.100.42,2001:db8:85a3::8a2e:370:7334'
+
+  const handleCopyIp = async () => {
+    await navigator.clipboard.writeText(WHITELIST_IPS)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   // Reset form when modal opens
   useEffect(() => {
@@ -95,6 +104,62 @@ export default function AddAccountModal({ open, onClose }: AddAccountModalProps)
               <X size={18} />
             </button>
           </div>
+
+          {/* Whitelist IP Note */}
+          <div
+            className="flex flex-col gap-2 rounded-lg px-3 py-2.5 text-xs"
+            style={{
+              backgroundColor: 'rgba(59, 130, 246, 0.08)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-secondary">Whitelist these IPs when creating your API key</span>
+                <span className="text-primary font-mono text-sm">{WHITELIST_IPS}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleCopyIp}
+                className="ml-3 p-1.5 rounded-md transition-colors hover:bg-white/5"
+                title="Copy IPs"
+              >
+                {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} className="text-secondary" />}
+              </button>
+            </div>
+          </div>
+
+          {/* API Permissions Note */}
+          {exchange === 'Gate' && (
+            <div
+              className="flex flex-col gap-1.5 rounded-lg px-3 py-2.5 text-xs"
+              style={{
+                backgroundColor: 'rgba(234, 179, 8, 0.08)',
+                border: '1px solid rgba(234, 179, 8, 0.2)',
+              }}
+            >
+              <span className="text-secondary">Required API permissions for Gate</span>
+              <ul className="text-primary text-xs list-disc list-inside flex flex-col gap-0.5">
+                <li>Spot/Margin — Read & Write</li>
+                <li>Account — Read</li>
+                <li>Perpetual Contract — Read & Write</li>
+              </ul>
+            </div>
+          )}
+          {exchange === 'OKX' && (
+            <div
+              className="flex flex-col gap-1.5 rounded-lg px-3 py-2.5 text-xs"
+              style={{
+                backgroundColor: 'rgba(234, 179, 8, 0.08)',
+                border: '1px solid rgba(234, 179, 8, 0.2)',
+              }}
+            >
+              <span className="text-secondary">Required API permissions for OKX</span>
+              <ul className="text-primary text-xs list-disc list-inside">
+                <li>Trade — must be enabled</li>
+              </ul>
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4" style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.15s' }}>

@@ -1,11 +1,11 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 import EquitySummaryChart from '@/pages/accounts/EquitySummaryChart'
 import AccountsDistribution from '@/pages/accounts/AccountsDistribution'
 import FilterBar from '@/pages/accounts/FilterBar'
 import AccountsTable from '@/pages/accounts/AccountsTable'
 import AddAccountModal from '@/components/AddAccountModal'
-import { ACCOUNTS_TABLE } from '@/data/mockData'
+
 import { useQuery } from '@tanstack/react-query';
 import { getAccounts } from '@/lib/api';
 
