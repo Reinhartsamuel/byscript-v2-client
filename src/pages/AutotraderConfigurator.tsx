@@ -71,12 +71,12 @@ function ExchangeDropdown({
   accounts,
   value,
   onChange,
-  _onConnectNew,
+  onConnectNew: _onConnectNew,
 }: {
   accounts: ExchangeAccount[]
   value: string
   onChange: (id: string) => void
-  _onConnectNew: () => void
+  onConnectNew: () => void
 }) {
   const [open, setOpen] = useState(false)
   const ref = useRef<HTMLDivElement>(null)
