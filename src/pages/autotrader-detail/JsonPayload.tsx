@@ -18,14 +18,34 @@ export default function JsonPayload({ data }: JsonPayloadProps) {
 
   const webhookUrl = `${WEBHOOK_BASE_URL}/webhook/signal`
 
-  const payload = JSON.stringify(
-    {
+  const buildPayload = (action: Action) => {
+    const base = {
       token: data.webhookToken ?? '<webhook_token>',
-      action: selectedAction,
-    },
-    null,
-    2,
-  )
+      action,
+    }
+    if (action === 'BUY' || action === 'SELL') {
+      return {
+        ...base,
+        // order_type defaults to "market" if omitted — include for clarity
+        order_type: 'market',
+        // price: 65000,        // required only when order_type = "limit"
+        take_profit: {
+          enabled: true,
+          price: '0',           // replace with your TP price
+          price_type: 'mark',   // mark | last | index
+        },
+        stop_loss: {
+          enabled: true,
+          price: '0',           // replace with your SL price
+          price_type: 'mark',
+        },
+      }
+    }
+    // CLOSE and CANCEL need only token + action
+    return base
+  }
+
+  const payload = JSON.stringify(buildPayload(selectedAction), null, 2)
 
   const handleCopy = () => {
     navigator.clipboard.writeText(payload)
