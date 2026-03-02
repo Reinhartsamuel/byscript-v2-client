@@ -130,6 +130,17 @@ export async function getAutotraderTrades(id: string) {
   return data;
 }
 
+export async function updateAutotraderStatus(id: string, status: 'active' | 'stopped') {
+  const res = await fetch(`${BASE_URL}/user/autotraders/${id}/status`, {
+    method: 'PATCH',
+    headers: authHeaders(),
+    body: JSON.stringify({ status }),
+  })
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
+  return data;
+}
+
 export async function createAutotraders(payload: {
   exchange_id: number;
   trading_plan_id: number;

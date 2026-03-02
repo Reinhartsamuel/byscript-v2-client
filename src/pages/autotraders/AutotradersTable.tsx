@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { ToastContainer } from 'react-toastify'
 import { AutotraderListRow } from '@/data/mockData'
+import { updateAutotraderStatus } from '@/lib/api'
+import { darkToast } from '@/components/DarkToast'
 
 interface AutotradersTableProps {
   data: AutotraderListRow[]
@@ -8,8 +12,21 @@ interface AutotradersTableProps {
 
 export default function AutotradersTable({ data }: AutotradersTableProps) {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
+
+  const statusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: 'active' | 'stopped' }) =>
+      updateAutotraderStatus(id, status),
+    onSuccess: (_, { status }) => {
+      queryClient.invalidateQueries({ queryKey: ['autotraders'] })
+      darkToast.success(status === 'active' ? 'Autotrader started' : 'Autotrader stopped')
+    },
+    onError: (err: Error) => {
+      darkToast.error(err.message)
+    },
+  })
 
   useEffect(() => {
     setCurrentPage(1)
@@ -20,6 +37,7 @@ export default function AutotradersTable({ data }: AutotradersTableProps) {
 
   return (
     <div className="card">
+      <ToastContainer />
       {/* Header */}
       <div
         className="grid text-muted text-xs uppercase tracking-wider mb-2"
@@ -81,12 +99,16 @@ export default function AutotradersTable({ data }: AutotradersTableProps) {
             {/* Action */}
             <div className="flex justify-center">
               <button
-                onClick={() => {}}
-                className="text-xs px-3 py-1 rounded-full transition-colors"
+                onClick={() => statusMutation.mutate({
+                  id: row.id,
+                  status: row.status === 'Active' ? 'stopped' : 'active',
+                })}
+                disabled={statusMutation.isPending}
+                className="text-xs px-3 py-1 rounded-full transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 style={{
                   backgroundColor: 'transparent',
-                  color: '#4ade80',
-                  border: '1px solid #4ade80',
+                  color: row.status === 'Active' ? '#f87171' : '#4ade80',
+                  border: `1px solid ${row.status === 'Active' ? '#f87171' : '#4ade80'}`,
                 }}
               >
                 {row.status === 'Active' ? 'Stop' : 'Start'}
