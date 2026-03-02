@@ -18,7 +18,7 @@ export default function AddAccountModal({ open, onClose }: AddAccountModalProps)
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
 
-  const WHITELIST_IPS = '198.51.100.42,2001:db8:85a3::8a2e:370:7334'
+  const WHITELIST_IPS = '151.101.66.15,151.101.66.15'
 
   const handleCopyIp = async () => {
     await navigator.clipboard.writeText(WHITELIST_IPS)
