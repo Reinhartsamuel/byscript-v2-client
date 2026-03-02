@@ -5,25 +5,26 @@ import { AutotraderDetailData } from '@/data/mockData'
 const ACTIONS = ['BUY', 'SELL', 'CLOSE', 'CANCEL'] as const
 type Action = (typeof ACTIONS)[number]
 
-const WEBHOOK_URL = 'https://api.byscript.io/webhook/tv/abc123xyz'
+const WEBHOOK_BASE_URL = import.meta.env.VITE_API_URL || 'https://api.byscript.io'
 
 interface JsonPayloadProps {
   data: AutotraderDetailData
 }
 
-export default function JsonPayload({ data: _data }: JsonPayloadProps) {
+export default function JsonPayload({ data }: JsonPayloadProps) {
   const [selectedAction, setSelectedAction] = useState<Action>('BUY')
   const [copied, setCopied] = useState(false)
   const [urlCopied, setUrlCopied] = useState(false)
 
+  const webhookUrl = `${WEBHOOK_BASE_URL}/webhook/signal`
+
   const payload = JSON.stringify(
     {
+      token: data.webhookToken ?? '<webhook_token>',
       action: selectedAction,
-      timestamp: new Date().toISOString(),
-      strategy: 'Grid Cuentrus',
     },
     null,
-    2
+    2,
   )
 
   const handleCopy = () => {
@@ -33,7 +34,7 @@ export default function JsonPayload({ data: _data }: JsonPayloadProps) {
   }
 
   const handleCopyUrl = () => {
-    navigator.clipboard.writeText(WEBHOOK_URL)
+    navigator.clipboard.writeText(webhookUrl)
     setUrlCopied(true)
     setTimeout(() => setUrlCopied(false), 2000)
   }
@@ -55,7 +56,7 @@ export default function JsonPayload({ data: _data }: JsonPayloadProps) {
         }}
       >
         <span className="text-sm" style={{ color: 'var(--color-text-primary)', wordBreak: 'break-all' }}>
-          {WEBHOOK_URL}
+          {webhookUrl}
         </span>
       </div>
       <button
@@ -76,7 +77,7 @@ export default function JsonPayload({ data: _data }: JsonPayloadProps) {
       </button>
 
       {/* Action buttons */}
-      <label className="text-muted text-xs block mb-2">Trading View sent Action</label>
+      <label className="text-muted text-xs block mb-2">TradingView sent Action</label>
       <div className="flex gap-2 mb-4">
         {ACTIONS.map((action) => (
           <button

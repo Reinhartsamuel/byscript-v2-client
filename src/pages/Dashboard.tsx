@@ -87,8 +87,10 @@ export default function Dashboard() {
   useEffect(() => {
     async function getDashboardData() {
       try {
-        const userId = JSON.parse(localStorage.getItem('user') || '{}').id
-        const res = await fetch(`${BASE_URL}/user/dashboard?user_id=${userId}&period=7D`)
+        const token = localStorage.getItem('token')
+        const res = await fetch(`${BASE_URL}/user/dashboard?period=7d`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        })
         const json = await res.json()
         setData({ ...EMPTY_DASHBOARD, ...json })
       } catch (error) {

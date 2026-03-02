@@ -28,14 +28,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signInWithGoogle() {
     const credential = await signInWithPopup(auth, googleProvider)
     const idToken = await credential.user.getIdToken()
-    loginWithFirebaseToken(idToken)
-    .then((res) => {
+    try {
+      const res = await loginWithFirebaseToken(idToken)
       localStorage.setItem('token', res.token)
       localStorage.setItem('user', JSON.stringify(res.user))
-  })
-    .catch((err) => {
+    } catch (err) {
       console.error('Backend login sync failed:', err)
-    })
+    }
   }
 
   async function signOut() {

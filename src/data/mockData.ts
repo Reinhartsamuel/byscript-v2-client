@@ -354,6 +354,7 @@ export interface AutotraderDetailData {
   riskReward: string
   maxCapitalUsed: number
   maxConcurrentPositions: number
+  webhookToken: string | null
 }
 
 export const AUTOTRADER_DETAIL: AutotraderDetailData = {
@@ -381,6 +382,7 @@ export const AUTOTRADER_DETAIL: AutotraderDetailData = {
   riskReward: '1:0.8',
   maxCapitalUsed: 119000,
   maxConcurrentPositions: 110,
+  webhookToken:'asrasd'
 }
 
 // ── Recent Trade Executions ──────────────────────────────────

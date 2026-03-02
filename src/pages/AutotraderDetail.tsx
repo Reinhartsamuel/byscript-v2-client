@@ -26,6 +26,7 @@ export interface AutotraderDetailResponse {
   position_mode: string
   autocompound: boolean | null
   created_at: string | null
+  webhook_token: string | null
   exchange_title: string
   trading_plan_name: string | null
   total_trades: number
@@ -198,6 +199,7 @@ export default function AutotraderDetail() {
     riskReward: '—',
     maxCapitalUsed: Number(autotrader.current_balance),
     maxConcurrentPositions: 0,
+    webhookToken: autotrader.webhook_token,
   }
 
   const executionsData = trades.map((t) => ({
