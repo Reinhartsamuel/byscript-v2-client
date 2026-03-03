@@ -722,34 +722,41 @@ export default function AutotraderConfigurator() {
       </div>
 
       {/* Page header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6">
         <h2 className="text-primary text-lg font-semibold">Autotrader Configurator</h2>
-        {/* Market toggle — top right */}
-        <div
-          className="flex items-center gap-1 p-1 rounded-lg"
-          style={{ backgroundColor: 'var(--color-bg-page)', border: '1px solid var(--color-border-subtle)' }}
-        >
-          {(['Spot', 'Futures'] as const).map((m) => (
-            <button
-              key={m}
-              onClick={() => handleMarketChange(m)}
-              className="px-4 py-1.5 rounded-md text-xs font-semibold transition-colors"
-              style={
-                market === m
-                  ? { backgroundColor: 'var(--color-accent-green-dim)', color: '#fff' }
-                  : { backgroundColor: 'transparent', color: 'var(--color-text-secondary)' }
-              }
-            >
-              {m}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Two-column layout: form + preview */}
       <div className="flex gap-6 items-start">
         {/* Left: form sections */}
         <div className="flex flex-col gap-4 flex-1 min-w-0">
+          {/* Market Type */}
+          <div className="card flex justify-between gap-4">
+            <div>
+              <h3 className="text-primary text-sm font-semibold">Market Type</h3>
+              <p className="text-muted text-xs mt-0.5">Choose between spot and futures trading.</p>
+            </div>
+            <div
+              className="flex items-center gap-1 p-1 rounded-lg self-start "
+              style={{ backgroundColor: 'var(--color-bg-page)', border: '1px solid var(--color-border-subtle)' }}
+            >
+              {(['Spot', 'Futures'] as const).map((m) => (
+                <button
+                  key={m}
+                  onClick={() => handleMarketChange(m)}
+                  className="px-4 py-1.5 rounded-md text-xs font-semibold transition-colors"
+                  style={
+                    market === m
+                      ? { backgroundColor: 'var(--color-accent-green-dim)', color: '#fff' }
+                      : { backgroundColor: 'transparent', color: 'var(--color-text-secondary)' }
+                  }
+                >
+                  {m}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Exchange */}
           <div className="card flex flex-col gap-4">
             <div className="flex items-start justify-between">
