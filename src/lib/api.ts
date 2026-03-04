@@ -141,6 +141,54 @@ export async function updateAutotraderStatus(id: string, status: 'active' | 'sto
   return data;
 }
 
+export async function getTradeHistory(params: {
+  exchange_id?: number;
+  market_type?: string;
+  contract?: string;
+  position_type?: 'long' | 'short';
+  status?: string;
+  date_from?: string;
+  date_to?: string;
+  limit?: number;
+  offset?: number;
+} = {}) {
+  const query = new URLSearchParams();
+  if (params.exchange_id != null) query.set('exchange_id', String(params.exchange_id));
+  if (params.market_type) query.set('market_type', params.market_type);
+  if (params.contract) query.set('contract', params.contract);
+  if (params.position_type) query.set('position_type', params.position_type);
+  if (params.status) query.set('status', params.status);
+  if (params.date_from) query.set('date_from', params.date_from);
+  if (params.date_to) query.set('date_to', params.date_to);
+  if (params.limit != null) query.set('limit', String(params.limit));
+  if (params.offset != null) query.set('offset', String(params.offset));
+
+  const res = await fetch(`${BASE_URL}/user/trades?${query.toString()}`, {
+    method: 'GET',
+    headers: authHeaders(),
+  })
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
+  return data as { data: TradeHistoryItem[]; total: number; limit: number; offset: number };
+}
+
+export interface TradeHistoryItem {
+  id: number;
+  contract: string;
+  position_type: string;
+  market_type: string;
+  size: string;
+  price: string | null;
+  status: string;
+  pnl: string | null;
+  pnl_margin: string | null;
+  open_filled_at: number | null;
+  created_at: string;
+  exchange_title: string;
+  exchange_user_id: string;
+  autotrader_symbol: string;
+}
+
 export async function createAutotraders(payload: {
   exchange_id: number;
   trading_plan_id: number;

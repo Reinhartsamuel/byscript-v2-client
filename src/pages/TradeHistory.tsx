@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import TradeHistoryFilterBar, { type TradeHistoryFilters } from './trade-history/TradeHistoryFilterBar'
 import TradeHistoryTable, { type Trade } from './trade-history/TradeHistoryTable'
+import { getTradeHistory } from '../lib/api'
 
 const DEFAULT_FILTERS: TradeHistoryFilters = {
   dateRange: 'Last 7 days',
@@ -11,105 +12,81 @@ const DEFAULT_FILTERS: TradeHistoryFilters = {
   status: 'All',
 }
 
-// Mock data — replace with API call
-const MOCK_TRADES: Trade[] = [
-  {
-    id: 1,
-    exchange: 'Binance',
-    market_type: 'futures',
-    contract: 'BTC_USDT',
-    position_type: 'long',
-    price: '67450.00',
-    size: '0.05000000',
-    pnl: '124.50',
-    status: 'closed',
-    autotrader_name: 'KeltnerDash',
-    account_name: 'Main Account',
-    open_filled_at: Math.floor(Date.now() / 1000) - 3600,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 2,
-    exchange: 'Bybit',
-    market_type: 'futures',
-    contract: 'ETH_USDT',
-    position_type: 'short',
-    price: '3210.50',
-    size: '0.50000000',
-    pnl: '-45.20',
-    status: 'closed',
-    autotrader_name: 'PivotTurbo',
-    account_name: 'Hedge Account',
-    open_filled_at: Math.floor(Date.now() / 1000) - 7200,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 3,
-    exchange: 'Binance',
-    market_type: 'spot',
-    contract: 'SOL_USDT',
-    position_type: 'long',
-    price: '185.30',
-    size: '10.00000000',
-    pnl: null,
-    status: 'open',
-    autotrader_name: 'IchimokuCore',
-    account_name: 'Main Account',
-    open_filled_at: Math.floor(Date.now() / 1000) - 900,
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: 4,
-    exchange: 'OKX',
-    market_type: 'futures',
-    contract: 'BTC_USDT',
-    position_type: 'short',
-    price: '68100.00',
-    size: '0.02000000',
-    pnl: null,
-    status: 'failed',
-    autotrader_name: 'KeltnerDash',
-    account_name: 'OKX Account',
-    open_filled_at: null,
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: 5,
-    exchange: 'Bybit',
-    market_type: 'futures',
-    contract: 'ETH_USDT',
-    position_type: 'long',
-    price: '3180.00',
-    size: '1.00000000',
-    pnl: '89.00',
-    status: 'filled',
-    autotrader_name: 'PivotTurbo',
-    account_name: 'Hedge Account',
-    open_filled_at: Math.floor(Date.now() / 1000) - 14400,
-    created_at: new Date().toISOString(),
-  },
-]
+function dateRangeToIso(dateRange: string): { date_from?: string; date_to?: string } {
+  const now = new Date()
+  const days: Record<string, number> = {
+    'Last 7 days': 7,
+    'Last 30 days': 30,
+    'Last 90 days': 90,
+  }
+  if (days[dateRange]) {
+    const from = new Date(now.getTime() - days[dateRange] * 24 * 60 * 60 * 1000)
+    return { date_from: from.toISOString() }
+  }
+  return {}
+}
 
 export default function TradeHistory() {
   const [filters, setFilters] = useState<TradeHistoryFilters>(DEFAULT_FILTERS)
   const [appliedFilters, setAppliedFilters] = useState<TradeHistoryFilters>(DEFAULT_FILTERS)
+  const [trades, setTrades] = useState<Trade[]>([])
+  const [loading, setLoading] = useState(false)
+
+  const fetchTrades = useCallback(async (f: TradeHistoryFilters) => {
+    setLoading(true)
+    try {
+      const params: Parameters<typeof getTradeHistory>[0] = {}
+
+      if (f.status !== 'All') params.status = f.status.toLowerCase()
+      if (f.pair !== 'All pairs') params.contract = f.pair.replace('/', '_')
+      if (f.market === 'Spot') params.market_type = 'spot'
+      else if (f.market === 'Futures') params.market_type = 'futures'
+
+      if (f.side === 'Buy · Long') params.position_type = 'long'
+      else if (f.side === 'Sell · Short') params.position_type = 'short'
+
+      const { date_from, date_to } = dateRangeToIso(f.dateRange)
+      if (date_from) params.date_from = date_from
+      if (date_to) params.date_to = date_to
+
+      const res = await getTradeHistory({ ...params, limit: 50 })
+
+      setTrades(
+        res.data.map((t) => ({
+          id: t.id,
+          exchange: t.exchange_title,
+          market_type: t.market_type,
+          contract: t.contract,
+          position_type: t.position_type,
+          price: t.price,
+          size: t.size,
+          pnl: t.pnl,
+          status: t.status,
+          autotrader_name: t.autotrader_symbol,
+          account_name: t.exchange_user_id,
+          open_filled_at: t.open_filled_at,
+          created_at: t.created_at,
+        }))
+      )
+    } catch (err) {
+      console.error('Failed to fetch trade history:', err)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchTrades(appliedFilters)
+  }, [appliedFilters, fetchTrades])
 
   function applyFilters() {
     setAppliedFilters(filters)
   }
 
-  const filtered = MOCK_TRADES.filter((t) => {
-    if (appliedFilters.status !== 'All' && t.status !== appliedFilters.status) return false
-    if (appliedFilters.pair !== 'All pairs' && t.contract !== appliedFilters.pair.replace('/', '_')) return false
-    if (appliedFilters.market === 'Spot' && t.market_type !== 'spot') return false
-    if (appliedFilters.market === 'Futures' && t.market_type !== 'futures') return false
-    return true
-  })
-
   return (
     <div className="flex flex-col gap-4">
       <TradeHistoryFilterBar filters={filters} onChange={setFilters} onApply={applyFilters} />
-      <TradeHistoryTable data={filtered} />
+      <TradeHistoryTable data={trades} loading={loading} />
     </div>
   )
 }

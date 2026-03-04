@@ -18,6 +18,7 @@ export interface Trade {
 
 interface Props {
   data: Trade[]
+  loading?: boolean
 }
 
 const COLS = [
@@ -68,7 +69,7 @@ function formatPnl(pnl: string | null) {
   )
 }
 
-export default function TradeHistoryTable({ data }: Props) {
+export default function TradeHistoryTable({ data, loading }: Props) {
   const [currentPage, setCurrentPage] = useState(1)
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
@@ -90,7 +91,9 @@ export default function TradeHistoryTable({ data }: Props) {
       </div>
 
       {/* Rows */}
-      {paginated.length === 0 ? (
+      {loading ? (
+        <p className="text-secondary text-sm py-8 text-center">Loading...</p>
+      ) : paginated.length === 0 ? (
         <p className="text-secondary text-sm py-8 text-center">No trades match these filters.</p>
       ) : (
         <div className="flex flex-col min-w-max w-full">
