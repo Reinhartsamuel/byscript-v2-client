@@ -11,7 +11,7 @@ function MiniChart({ data }: { data: number[] }) {
     datasets: [
       {
         data,
-        borderColor: '#4ade80',
+        borderColor: '#00e5d1',
         borderWidth: 1.5,
         backgroundColor: 'transparent',
         pointRadius: 0,
@@ -26,13 +26,14 @@ function MiniChart({ data }: { data: number[] }) {
     scales: { x: { display: false }, y: { display: false } },
   }
   return (
-    <div style={{ height: '40px' }}>
+    <div style={{ height: '36px', width: '70px' }}>
       <Line data={chartData} options={options} />
     </div>
   )
 }
 
 function getInitials(name: string) {
+  if (!name) return '??'
   return name
     .split(' ')
     .map((w) => w[0])
@@ -41,59 +42,136 @@ function getInitials(name: string) {
     .slice(0, 2)
 }
 
+const RANK_COLORS = ['#00e5d1', '#3d9cf5', '#a78bfa']
+
 export default function TopAutotraders({ data }: { data: TopAutotraderItem[] }) {
   const navigate = useNavigate()
 
   return (
-    <div className="card">
-      <h3 className="text-primary text-sm font-semibold mb-4">Top Autotraders</h3>
+    <div className="card animate-fade-up" style={{ animationDelay: '0.1s' }}>
+      <span className="label" style={{ display: 'block', marginBottom: '16px' }}>Top Autotraders</span>
 
       {data.length === 0 ? (
-        <div className="flex items-center justify-center py-6">
-          <span className="text-muted text-sm">No autotraders yet</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 0' }}>
+          <span style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: '0.75rem',
+            color: 'var(--color-text-muted)',
+          }}>
+            — no autotraders yet —
+          </span>
         </div>
       ) : (
-        <div className="flex gap-4">
-          {data.map((at) => (
+        <div style={{ display: 'flex', gap: '12px' }}>
+          {data.map((at, idx) => (
             <div
               key={at.id}
-              className="flex-1 flex flex-col gap-3 p-4 rounded-lg"
-              style={{ backgroundColor: 'var(--color-bg-card-hover)', border: '1px solid var(--color-border-subtle)' }}
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                padding: '14px',
+                borderRadius: '6px',
+                backgroundColor: 'var(--color-bg-page)',
+                border: '1px solid var(--color-border-subtle)',
+                position: 'relative',
+                overflow: 'hidden',
+                transition: 'border-color 0.15s',
+                cursor: 'pointer',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(0,229,209,0.25)')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--color-border-subtle)')}
+              onClick={() => navigate(`/autotraders/${at.id}`)}
             >
-              <div className="flex items-start gap-2">
-                <div
-                  className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                  style={{ backgroundColor: '#4ade80' }}
-                >
+              {/* Rank indicator */}
+              <span style={{
+                position: 'absolute',
+                top: '10px',
+                right: '10px',
+                fontFamily: "'Syne', sans-serif",
+                fontWeight: 800,
+                fontSize: '1.1rem',
+                color: RANK_COLORS[idx] ?? 'var(--color-text-muted)',
+                opacity: 0.3,
+                lineHeight: 1,
+              }}>
+                #{idx + 1}
+              </span>
+
+              {/* Header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <div style={{
+                  width: '28px', height: '28px',
+                  borderRadius: '4px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  backgroundColor: 'var(--color-accent-bg-strong)',
+                  border: `1px solid ${RANK_COLORS[idx] ?? 'var(--color-border-subtle)'}33`,
+                  color: RANK_COLORS[idx] ?? 'var(--color-accent)',
+                  fontFamily: "'Syne', sans-serif",
+                  fontWeight: 700,
+                  fontSize: '0.65rem',
+                  letterSpacing: '0.05em',
+                  flexShrink: 0,
+                }}>
                   {getInitials(at.name)}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-primary text-sm font-semibold truncate">{at.name}</span>
-                    <span
-                      className="text-green text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded-full"
-                      style={{ backgroundColor: 'rgba(74, 222, 128, 0.15)' }}
-                    >
+                <span style={{
+                  fontFamily: "'Syne', sans-serif",
+                  fontWeight: 600,
+                  fontSize: '0.8rem',
+                  color: 'var(--color-text-primary)',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  whiteSpace: 'nowrap',
+                  flex: 1,
+                }}>
+                  {at.name}
+                </span>
+              </div>
+
+              {/* Stats row */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  <div>
+                    <span className="label" style={{ fontSize: '0.6rem' }}>Pair</span>
+                    <p style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '0.72rem',
+                      color: 'var(--color-text-primary)',
+                      margin: '2px 0 0',
+                    }}>
+                      {at.pair}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="label" style={{ fontSize: '0.6rem' }}>Win Rate</span>
+                    <p style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '0.72rem',
+                      color: 'var(--color-positive)',
+                      margin: '2px 0 0',
+                    }}>
                       {at.win_rate}%
-                    </span>
+                    </p>
+                  </div>
+                  <div>
+                    <span className="label" style={{ fontSize: '0.6rem' }}>Trades</span>
+                    <p style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '0.72rem',
+                      color: 'var(--color-text-secondary)',
+                      margin: '2px 0 0',
+                    }}>
+                      {at.trades}
+                    </p>
                   </div>
                 </div>
-              </div>
 
-              <div className="flex flex-row w-full justify-around gap-2">
-                <div className="w-1/3 flex flex-col gap-1">
-                  <span className="text-secondary text-xs">{at.pair}</span>
-                  <span className="text-muted text-xs">Trades: {at.trades}</span>
-                </div>
-                <div className="w-1/3" />
-                <div className="w-1/3">
-                  {at.mini_chart && at.mini_chart.length > 0 && <MiniChart data={at.mini_chart} />}
-                </div>
+                {at.mini_chart && at.mini_chart.length > 0 && (
+                  <MiniChart data={at.mini_chart} />
+                )}
               </div>
-
-              <button className="button" onClick={() => navigate(`/autotraders/${at.id}`)}>
-                View Autotrader
-              </button>
             </div>
           ))}
         </div>

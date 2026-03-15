@@ -26,22 +26,19 @@ export default function JsonPayload({ data }: JsonPayloadProps) {
     if (action === 'BUY' || action === 'SELL') {
       return {
         ...base,
-        // order_type defaults to "market" if omitted — include for clarity
         order_type: 'market',
-        // price: 65000,        // required only when order_type = "limit"
         take_profit: {
           enabled: true,
-          price: '0',           // replace with your TP price
-          price_type: 'mark',   // mark | last | index
+          price: '{{takeProfitPrice}}',
+          price_type: 'mark',
         },
         stop_loss: {
           enabled: true,
-          price: '0',           // replace with your SL price
+          price: '{{stopLossPrice}}',
           price_type: 'mark',
         },
       }
     }
-    // CLOSE and CANCEL need only token + action
     return base
   }
 
@@ -86,7 +83,7 @@ export default function JsonPayload({ data }: JsonPayloadProps) {
           backgroundColor: urlCopied
             ? 'var(--color-accent-green-dim)'
             : 'var(--color-accent-green)',
-          color: '#000',
+          color: '#ffffff',
           padding: '10px 0',
           borderRadius: '8px',
           border: 'none',
@@ -146,7 +143,7 @@ export default function JsonPayload({ data }: JsonPayloadProps) {
           backgroundColor: copied
             ? 'var(--color-accent-green-dim)'
             : 'var(--color-accent-green)',
-          color: '#000',
+          color: '#ffffff',
           padding: '10px 0',
           borderRadius: '8px',
           border: 'none',

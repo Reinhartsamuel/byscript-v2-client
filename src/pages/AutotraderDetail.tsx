@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { X } from 'lucide-react'
@@ -8,7 +8,7 @@ import ActionButtons from '@/pages/autotrader-detail/ActionButtons'
 import RecentTradeExecutions from '@/pages/autotrader-detail/RecentTradeExecutions'
 import TradeSetup from '@/pages/autotrader-detail/TradeSetup'
 import JsonPayload from '@/pages/autotrader-detail/JsonPayload'
-import { getAutotraderDetail, getAutotraderTrades, deleteAutotrader } from '@/lib/api'
+import { getAutotraderDetail, getAutotraderTrades, deleteAutotrader, subscribeToAutotraderTrades } from '@/lib/api'
 
 export interface AutotraderDetailResponse {
   id: number
@@ -154,13 +154,25 @@ export default function AutotraderDetail() {
     select: (res): AutotraderDetailResponse => res.data,
   })
 
-  const { data: trades = [] } = useQuery({
+  const { data: initialTrades = [] } = useQuery({
     queryKey: ['autotrader-trades', id],
     queryFn: () => getAutotraderTrades(id!),
     enabled: !!id,
     staleTime: 1000 * 60 * 2,
     select: (res): TradeRow[] => res.data || [],
   })
+
+  const [trades, setTrades] = useState<TradeRow[]>([])
+
+  useEffect(() => {
+    if (initialTrades.length > 0) setTrades(initialTrades)
+  }, [initialTrades])
+
+  useEffect(() => {
+    if (!id) return
+    const unsubscribe = subscribeToAutotraderTrades(id, (items) => setTrades(items as TradeRow[]))
+    return unsubscribe
+  }, [id])
 
   const deleteMutation = useMutation({
     mutationFn: () => deleteAutotrader(id!),

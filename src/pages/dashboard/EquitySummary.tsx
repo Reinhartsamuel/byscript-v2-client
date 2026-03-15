@@ -35,11 +35,11 @@ export default function EquitySummary({ data }: { data: EquitySummaryData }) {
       {
         label: 'Equity',
         data: chartSource.map((d) => d.value),
-        borderColor: '#4ade80',
-        borderWidth: 2.5,
+        borderColor: '#00e5d1',
+        borderWidth: 1.5,
         backgroundColor: 'transparent',
         pointRadius: 0,
-        pointHoverRadius: 4,
+        pointHoverRadius: 3,
         tension: 0,
       },
     ],
@@ -52,13 +52,15 @@ export default function EquitySummary({ data }: { data: EquitySummaryData }) {
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#22223a',
-        titleColor: '#8888a0',
-        bodyColor: '#f0f0f0',
-        borderColor: '#2e2e45',
+        backgroundColor: '#0d1117',
+        titleColor: '#5a7a99',
+        bodyColor: '#e8edf3',
+        borderColor: '#1a2332',
         borderWidth: 1,
-        cornerRadius: 8,
+        cornerRadius: 4,
         displayColors: false,
+        titleFont: { family: "'IBM Plex Mono', monospace", size: 11 },
+        bodyFont: { family: "'IBM Plex Mono', monospace", size: 12 },
         callbacks: {
           label: (ctx) => `$${(ctx.parsed.y as number).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
         },
@@ -67,11 +69,15 @@ export default function EquitySummary({ data }: { data: EquitySummaryData }) {
     scales: {
       x: {
         grid: { display: false },
-        ticks: { color: '#8888a0', font: { size: 11 }, maxTicksLimit: 4 },
+        ticks: {
+          color: '#2e4a66',
+          font: { size: 10, family: "'IBM Plex Mono', monospace" },
+          maxTicksLimit: 4,
+        },
         border: { display: false },
       },
       y: {
-        grid: { display: true, color: 'rgba(46,46,69,0.6)' },
+        grid: { display: true, color: 'rgba(26,35,50,0.8)' },
         ticks: { display: false },
         border: { display: false },
       },
@@ -91,12 +97,17 @@ export default function EquitySummary({ data }: { data: EquitySummaryData }) {
         const y = point.y
         const label = `$${chartSource[peakIndex].value.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
         ctx.save()
-        ctx.fillStyle = '#4ade80'
+        // Glow circle
+        ctx.shadowColor = '#00e5d1'
+        ctx.shadowBlur = 8
+        ctx.fillStyle = '#00e5d1'
         ctx.beginPath()
-        ctx.arc(x, y, 3.5, 0, Math.PI * 2)
+        ctx.arc(x, y, 3, 0, Math.PI * 2)
         ctx.fill()
-        ctx.fillStyle = '#f0f0f0'
-        ctx.font = '11px Inter, system-ui, sans-serif'
+        ctx.shadowBlur = 0
+        // Label
+        ctx.fillStyle = '#00e5d1'
+        ctx.font = "10px 'IBM Plex Mono', monospace"
         ctx.textAlign = 'center'
         ctx.textBaseline = 'bottom'
         ctx.fillText(label, x, y - 8)
@@ -106,28 +117,49 @@ export default function EquitySummary({ data }: { data: EquitySummaryData }) {
     [peakIndex, chartSource]
   )
 
-  return (
-    <div className="card">
-      <div className="flex items-baseline gap-3 mb-1">
-        <span className="text-secondary text-xs uppercase tracking-wide">Equity Summary</span>
-      </div>
+  const balance = data?.total_balance ?? 0
 
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-baseline gap-3">
-          <span className="text-primary text-2xl font-bold">
-            ${(data?.total_balance ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+  return (
+    <div className="card animate-fade-up">
+      <div className="flex items-start justify-between mb-5">
+        <div>
+          <span className="label" style={{ display: 'block', marginBottom: '6px' }}>Total Equity</span>
+          <span style={{
+            fontFamily: "'Syne', sans-serif",
+            fontWeight: 700,
+            fontSize: '1.9rem',
+            letterSpacing: '-0.03em',
+            color: 'var(--color-text-primary)',
+            lineHeight: 1,
+          }}>
+            ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
         </div>
 
-        <div className="flex gap-1">
+        <div style={{
+          display: 'flex',
+          gap: '2px',
+          backgroundColor: 'var(--color-bg-page)',
+          border: '1px solid var(--color-border-subtle)',
+          borderRadius: '4px',
+          padding: '3px',
+        }}>
           {TIME_TABS.map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className="text-xs px-3 py-1 rounded-full transition-colors"
               style={{
-                backgroundColor: tab === activeTab ? 'var(--color-bg-card-hover)' : 'transparent',
-                color: tab === activeTab ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '0.68rem',
+                fontWeight: 500,
+                letterSpacing: '0.06em',
+                padding: '4px 9px',
+                borderRadius: '3px',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                backgroundColor: tab === activeTab ? 'var(--color-accent-bg-strong)' : 'transparent',
+                color: tab === activeTab ? 'var(--color-accent)' : 'var(--color-text-muted)',
               }}
             >
               {tab}
@@ -136,12 +168,18 @@ export default function EquitySummary({ data }: { data: EquitySummaryData }) {
         </div>
       </div>
 
-      <div style={{ height: '200px' }}>
+      <div style={{ height: '180px' }}>
         {chartSource.length > 0 ? (
           <Line data={chartData} options={chartOptions} plugins={[peakLabelPlugin]} />
         ) : (
           <div className="h-full flex items-center justify-center">
-            <span className="text-muted text-sm">No equity data available</span>
+            <span style={{
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontSize: '0.75rem',
+              color: 'var(--color-text-muted)',
+            }}>
+              — no equity data —
+            </span>
           </div>
         )}
       </div>

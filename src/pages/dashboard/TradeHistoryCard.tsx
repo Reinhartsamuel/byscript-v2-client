@@ -1,66 +1,167 @@
-import { Share2 } from 'lucide-react'
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import type { TradeHistoryItem } from '@/pages/Dashboard'
 
-const TICKER_DOT_COLORS = ['#4ade80', '#22d3ee', '#60a5fa', '#fb923c', '#a78bfa']
+const DOT_COLORS = ['#00e5d1', '#3d9cf5', '#a78bfa', '#fb923c', '#f43f5e']
 
 export default function TradeHistoryCard({ data }: { data: TradeHistoryItem[] }) {
+  const navigate = useNavigate()
+
   return (
-    <div className="card">
-      <div className="flex items-center justify-between mb-1">
-        <h3 className="text-primary text-sm font-semibold">Trade History</h3>
-        <span className="text-green text-xs cursor-pointer hover:underline">View All</span>
+    <div className="card animate-fade-up">
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '4px' }}>
+        <span className="label">Trade History</span>
+        <button
+          onClick={() => navigate('/trade-history')}
+          style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: '0.65rem',
+            color: 'var(--color-accent)',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            letterSpacing: '0.04em',
+            transition: 'opacity 0.15s',
+            padding: 0,
+          }}
+          onMouseEnter={e => (e.currentTarget.style.opacity = '0.7')}
+          onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+        >
+          VIEW ALL →
+        </button>
       </div>
-      <p className="text-muted text-xs mb-4">Last executed &amp; failed trades</p>
+
+      <p style={{
+        fontFamily: "'IBM Plex Mono', monospace",
+        fontSize: '0.65rem',
+        color: 'var(--color-text-muted)',
+        marginBottom: '16px',
+      }}>
+        Recent executions
+      </p>
 
       {data.length === 0 ? (
-        <div className="flex items-center justify-center py-6">
-          <span className="text-muted text-sm">No trades yet</span>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 0' }}>
+          <span style={{
+            fontFamily: "'IBM Plex Mono', monospace",
+            fontSize: '0.75rem',
+            color: 'var(--color-text-muted)',
+          }}>
+            — no trades yet —
+          </span>
         </div>
       ) : (
-        <>
-          <div className="grid text-muted text-xs uppercase tracking-wider mb-2" style={{ gridTemplateColumns: '1fr auto auto auto auto' }}>
-            <span>Action</span>
-            <span className="text-right">Price</span>
-            <span className="text-right">PnL</span>
-            <span className="text-right">Time</span>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          {/* Column headers */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 52px 60px 40px',
+            gap: '8px',
+            paddingBottom: '8px',
+            borderBottom: '1px solid var(--color-border-subtle)',
+            marginBottom: '4px',
+          }}>
+            {['Asset', 'P&L', '%', 'Age'].map((h) => (
+              <span key={h} style={{
+                fontFamily: "'IBM Plex Mono', monospace",
+                fontSize: '0.6rem',
+                color: 'var(--color-text-muted)',
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase',
+                textAlign: h === 'Asset' ? 'left' : 'right',
+              }}>
+                {h}
+              </span>
+            ))}
           </div>
 
-          <div className="flex flex-col">
-            {data.map((trade, i) => (
+          {data.map((trade, i) => {
+            const positive = (trade.pnl_percent ?? 0) >= 0
+            return (
               <div
                 key={trade.id}
-                className="flex items-center justify-between py-2.5"
-                style={{ borderTop: i > 0 ? '1px solid var(--color-border-subtle)' : 'none' }}
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 52px 60px 40px',
+                  gap: '8px',
+                  alignItems: 'center',
+                  padding: '9px 0',
+                  borderBottom: i < data.length - 1 ? '1px solid rgba(26,35,50,0.6)' : 'none',
+                  transition: 'background 0.1s',
+                }}
               >
-                <div className="flex items-center gap-2.5">
-                  <div
-                    className="w-2 h-2 rounded-full"
-                    style={{ backgroundColor: TICKER_DOT_COLORS[i % TICKER_DOT_COLORS.length] }}
-                  />
-                  <div>
-                    <span className="text-primary text-sm font-medium">{trade.ticker}</span>
-                    <p className="text-muted text-xs">{trade.exchange}</p>
+                {/* Asset */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
+                  <span style={{
+                    width: '6px', height: '6px',
+                    borderRadius: '1px',
+                    backgroundColor: DOT_COLORS[i % DOT_COLORS.length],
+                    flexShrink: 0,
+                  }} />
+                  <div style={{ overflow: 'hidden' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+                      <span style={{
+                        fontFamily: "'IBM Plex Mono', monospace",
+                        fontSize: '0.73rem',
+                        fontWeight: 500,
+                        color: 'var(--color-text-primary)',
+                      }}>
+                        {trade.ticker}
+                      </span>
+                      <span className={trade.action === 'Buy' ? 'badge-green' : trade.action === 'Sell' ? 'badge-red' : 'badge-gray'}>
+                        {trade.action}
+                      </span>
+                    </div>
+                    <span style={{
+                      fontFamily: "'IBM Plex Mono', monospace",
+                      fontSize: '0.6rem',
+                      color: 'var(--color-text-muted)',
+                      display: 'block',
+                      marginTop: '1px',
+                    }}>
+                      {trade.exchange}
+                    </span>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <span className={trade.action === 'Buy' ? 'badge-green' : trade.action === 'Sell' ? 'badge-red' : 'badge-gray'}>
-                    {trade.action}
+                {/* P&L */}
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '0.7rem',
+                  color: 'var(--color-text-primary)',
+                  textAlign: 'right',
+                }}>
+                  ${Math.abs(trade.pnl ?? 0).toFixed(2)}
+                </span>
+
+                {/* % */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '2px' }}>
+                  {positive
+                    ? <ArrowUpRight size={10} style={{ color: 'var(--color-positive)', flexShrink: 0 }} />
+                    : <ArrowDownRight size={10} style={{ color: 'var(--color-negative)', flexShrink: 0 }} />
+                  }
+                  <span style={{
+                    fontFamily: "'IBM Plex Mono', monospace",
+                    fontSize: '0.7rem',
+                    color: positive ? 'var(--color-positive)' : 'var(--color-negative)',
+                  }}>
+                    {Math.abs(trade.pnl_percent ?? 0).toFixed(2)}%
                   </span>
-                  <span className="text-primary text-xs w-12 text-right">${Math.abs(trade.pnl).toFixed(2)}</span>
-                  <span className={`text-xs w-14 text-right ${trade.pnl_percent >= 0 ? 'text-green' : 'text-red'}`}>
-                    {trade.pnl_percent >= 0 ? '+' : ''}
-                    {trade.pnl_percent.toFixed(2)}%
-                  </span>
-                  <span className="text-muted text-xs w-12 text-right">{trade.time_ago}</span>
-                  <button className="text-green text-xs flex items-center gap-1 hover:underline">
-                    <Share2 size={11} />
-                  </button>
                 </div>
+
+                {/* Time */}
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '0.6rem',
+                  color: 'var(--color-text-muted)',
+                  textAlign: 'right',
+                }}>
+                  {trade.time_ago}
+                </span>
               </div>
-            ))}
-          </div>
-        </>
+            )
+          })}
+        </div>
       )}
     </div>
   )

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import TradeHistoryFilterBar, { type TradeHistoryFilters } from './trade-history/TradeHistoryFilterBar'
 import TradeHistoryTable, { type Trade } from './trade-history/TradeHistoryTable'
-import { getTradeHistory } from '../lib/api'
+import { getTradeHistory, subscribeToTrades } from '../lib/api'
 
 const DEFAULT_FILTERS: TradeHistoryFilters = {
   dateRange: 'Last 7 days',
@@ -78,6 +78,30 @@ export default function TradeHistory() {
   useEffect(() => {
     fetchTrades(appliedFilters)
   }, [appliedFilters, fetchTrades])
+
+  // SSE: re-fetch when the backend pushes a trade update
+  useEffect(() => {
+    const unsubscribe = subscribeToTrades((items) => {
+      setTrades(
+        items.map((t) => ({
+          id: t.id,
+          exchange: t.exchange_title,
+          market_type: t.market_type,
+          contract: t.contract,
+          position_type: t.position_type,
+          price: t.price,
+          size: t.size,
+          pnl: t.pnl,
+          status: t.status,
+          autotrader_name: t.autotrader_symbol,
+          account_name: t.exchange_user_id,
+          open_filled_at: t.open_filled_at,
+          created_at: t.created_at,
+        }))
+      )
+    })
+    return unsubscribe
+  }, [])
 
   function applyFilters() {
     setAppliedFilters(filters)

@@ -5,7 +5,7 @@ import type { AccountSummaryItem } from '@/pages/Dashboard'
 
 ChartJS.register(DoughnutController, ArcElement, Tooltip)
 
-const DOT_COLORS = ['#4ade80', '#22d3ee', '#60a5fa', '#fb923c', '#a78bfa', '#facc15']
+const DOT_COLORS = ['#00e5d1', '#3d9cf5', '#a78bfa', '#fb923c', '#f43f5e', '#facc15']
 
 export default function AccountsSummary({ data }: { data: AccountSummaryItem[] }) {
   const navigate = useNavigate()
@@ -20,14 +20,16 @@ export default function AccountsSummary({ data }: { data: AccountSummaryItem[] }
 
   if (accounts.length === 0) {
     return (
-      <div className="card flex flex-col items-center justify-center gap-4 py-8">
-        <h3 className="text-primary text-sm font-semibold">Accounts Summary</h3>
-        <p className="text-muted text-sm text-center">You have no accounts connected yet.</p>
+      <div className="card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '32px 20px' }}>
+        <span className="label">Accounts Summary</span>
+        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: '0.75rem', color: 'var(--color-text-muted)', textAlign: 'center' }}>
+          No accounts connected yet.
+        </p>
         <button
-          className="button"
+          className="button-accent"
           onClick={() => navigate('/accounts', { state: { openAddAccount: true } })}
         >
-          Add Account
+          + ADD ACCOUNT
         </button>
       </div>
     )
@@ -39,7 +41,7 @@ export default function AccountsSummary({ data }: { data: AccountSummaryItem[] }
       {
         data: accounts.map((a) => a.value),
         backgroundColor: accounts.map((a) => a.color),
-        borderColor: '#1a1a2e',
+        borderColor: '#080c10',
         borderWidth: 3,
         hoverOffset: 4,
       },
@@ -49,16 +51,18 @@ export default function AccountsSummary({ data }: { data: AccountSummaryItem[] }
   const chartOptions: import('chart.js').ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
-    cutout: '65%',
+    cutout: '70%',
     plugins: {
       legend: { display: false },
       tooltip: {
-        backgroundColor: '#22223a',
-        titleColor: '#8888a0',
-        bodyColor: '#f0f0f0',
-        borderColor: '#2e2e45',
+        backgroundColor: '#0d1117',
+        titleColor: '#5a7a99',
+        bodyColor: '#e8edf3',
+        borderColor: '#1a2332',
         borderWidth: 1,
-        cornerRadius: 8,
+        cornerRadius: 4,
+        titleFont: { family: "'IBM Plex Mono', monospace", size: 11 },
+        bodyFont: { family: "'IBM Plex Mono', monospace", size: 12 },
         callbacks: {
           label: (ctx) => ` $${ctx.parsed.toLocaleString('en-US')}`,
         },
@@ -67,26 +71,53 @@ export default function AccountsSummary({ data }: { data: AccountSummaryItem[] }
   }
 
   return (
-    <div className="card">
-      <h3 className="text-primary text-sm font-semibold mb-4">Accounts Summary</h3>
+    <div className="card animate-fade-up" style={{ animationDelay: '0.05s' }}>
+      <span className="label" style={{ display: 'block', marginBottom: '16px' }}>Accounts Summary</span>
 
-      <div className="flex gap-6">
-        <div className="flex-1 flex flex-col gap-2.5">
-          {accounts.map((account) => (
-            <div key={account.id} className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: account.color }} />
-                <span className="text-secondary text-sm">{account.name}</span>
+      <div style={{ display: 'flex', gap: '24px', alignItems: 'center' }}>
+        {/* Account list */}
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {accounts.map((account, i) => (
+            <div key={account.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{
+                  display: 'inline-block',
+                  width: '8px', height: '8px',
+                  borderRadius: '2px',
+                  backgroundColor: account.color,
+                  flexShrink: 0,
+                }} />
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '0.73rem',
+                  color: 'var(--color-text-secondary)',
+                }}>
+                  {account.name}
+                </span>
               </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-primary text-sm font-medium">${account.value.toLocaleString()}</span>
-                <span className="text-secondary text-xs">{account.percentage}%</span>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '0.73rem',
+                  fontWeight: 500,
+                  color: 'var(--color-text-primary)',
+                }}>
+                  ${account.value.toLocaleString()}
+                </span>
+                <span style={{
+                  fontFamily: "'IBM Plex Mono', monospace",
+                  fontSize: '0.65rem',
+                  color: 'var(--color-text-muted)',
+                }}>
+                  {account.percentage}%
+                </span>
               </div>
             </div>
           ))}
         </div>
 
-        <div style={{ width: '140px', height: '160px', flexShrink: 0 }}>
+        {/* Donut */}
+        <div style={{ width: '120px', height: '120px', flexShrink: 0, position: 'relative' }}>
           <Doughnut data={chartData} options={chartOptions} />
         </div>
       </div>

@@ -172,6 +172,26 @@ export async function getTradeHistory(params: {
   return data as { data: TradeHistoryItem[]; total: number; limit: number; offset: number };
 }
 
+export interface AutotraderTradeRow {
+  id: number;
+  trade_id: string;
+  contract: string;
+  position_type: string;
+  market_type: string;
+  size: string;
+  price: string | null;
+  leverage: number;
+  leverage_type: string;
+  status: string;
+  position_status: string | null;
+  pnl: string | null;
+  pnl_margin: string | null;
+  open_fill_price: string | null;
+  close_fill_price: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
 export interface TradeHistoryItem {
   id: number;
   contract: string;
@@ -187,6 +207,69 @@ export interface TradeHistoryItem {
   exchange_title: string;
   exchange_user_id: string;
   autotrader_symbol: string;
+}
+
+export function subscribeToTrades(onData: (trades: TradeHistoryItem[]) => void): () => void {
+  const controller = new AbortController()
+  fetch(`${BASE_URL}/user/sse/trades`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    signal: controller.signal,
+  }).then(async (res) => {
+    if (!res.body) return
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let buf = ''
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buf += decoder.decode(value, { stream: true })
+      const lines = buf.split('\n\n')
+      buf = lines.pop() ?? ''
+      for (const chunk of lines) {
+        const line = chunk.trim()
+        if (!line.startsWith('data:')) continue
+        try {
+          const payload = JSON.parse(line.slice(5).trim())
+          if (payload.type === 'trades') onData(payload.data)
+        } catch { /* ignore parse errors */ }
+      }
+    }
+  }).catch(() => { /* aborted or network error — silently ignore */ })
+
+  return () => controller.abort()
+}
+
+export function subscribeToAutotraderTrades(
+  id: string,
+  onData: (trades: AutotraderTradeRow[]) => void,
+): () => void {
+  const controller = new AbortController()
+  fetch(`${BASE_URL}/user/sse/autotraders/${id}/trades`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    signal: controller.signal,
+  }).then(async (res) => {
+    if (!res.body) return
+    const reader = res.body.getReader()
+    const decoder = new TextDecoder()
+    let buf = ''
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+      buf += decoder.decode(value, { stream: true })
+      const lines = buf.split('\n\n')
+      buf = lines.pop() ?? ''
+      for (const chunk of lines) {
+        const line = chunk.trim()
+        if (!line.startsWith('data:')) continue
+        try {
+          const payload = JSON.parse(line.slice(5).trim())
+          if (payload.type === 'trades') onData(payload.data)
+        } catch { /* ignore parse errors */ }
+      }
+    }
+  }).catch(() => { /* aborted or network error — silently ignore */ })
+
+  return () => controller.abort()
 }
 
 export async function createAutotraders(payload: {
