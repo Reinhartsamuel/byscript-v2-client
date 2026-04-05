@@ -27,6 +27,7 @@ export default function JsonPayload({ data }: JsonPayloadProps) {
       return {
         ...base,
         order_type: 'market',
+        market_price: '{{close}}',
         take_profit: {
           enabled: true,
           price: '{{takeProfitPrice}}',

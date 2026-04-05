@@ -3,7 +3,37 @@ import { X, Loader2, Copy, Check } from 'lucide-react'
 import { registerExchangeAccount } from '@/lib/api'
 import { ToastContainer } from 'react-toastify';
 import { darkToast } from './DarkToast';
-const EXCHANGES = ['Gate', 'OKX', 'Hyperliquid']
+
+export const exchanges = [
+  {
+    exchange_name: 'GATE',
+    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/60/large/Frame_1.png?1747795534',
+  },
+  {
+    exchange_name: 'OKX',
+    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/96/large/WeChat_Image_20220117220452.png?1706864283',
+  },
+  {
+    exchange_name: 'HYPERLIQUID',
+    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/1571/large/PFP.png?1714470912',
+  },
+  {
+    exchange_name: 'TOKOCRYPTO',
+    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/501/large/toko.png?1706864476',
+  },
+  {
+    exchange_name: 'BITGET',
+    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/540/large/2023-07-25_21.47.43.jpg?1706864507',
+  },
+  {
+    exchange_name: 'MEXC',
+    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/409/large/logo_new.png?1743600043',
+  },
+  {
+    exchange_name: 'BITMART',
+    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/239/large/Bitmart.png?1706864341',
+  },
+];
 
 interface AddAccountModalProps {
   open: boolean
@@ -62,7 +92,7 @@ export default function AddAccountModal({ open, onClose }: AddAccountModalProps)
 
     try {
       const addAccount = await registerExchangeAccount({
-        exchange: exchange.toLowerCase() as 'gate' | 'okx' | 'hyperliquid',
+        exchange: exchange.toLowerCase() as any,
         api_key: apiKey,
         api_secret: apiSecret,
         api_passphrase: passphrase,
@@ -83,144 +113,187 @@ export default function AddAccountModal({ open, onClose }: AddAccountModalProps)
     }
   }
 
-    const isOKX = exchange === 'OKX'
+  const isOKX = exchange === 'OKX'
+  const isBitget = exchange === 'BITGET'
+  const isBitmart = exchange === 'BITMART'
+  const requiresPassphrase = isOKX || isBitget || isBitmart
 
-    return (
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
+      onClick={loading ? undefined : onClose}
+    >
+      <ToastContainer />
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center"
-        style={{ backgroundColor: 'rgba(0,0,0,0.6)' }}
-        onClick={loading ? undefined : onClose}
+        className="relative w-full max-w-xl rounded-xl p-6 flex flex-col gap-5 overflow-y-auto max-h-[90vh]"
+        style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border-subtle)' }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <ToastContainer />
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <h2 className="text-primary text-base font-semibold">Add Account</h2>
+          <button onClick={onClose} disabled={loading} className="text-secondary hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+            <X size={18} />
+          </button>
+        </div>
+
+        {/* Whitelist IP Note */}
         <div
-          className="relative w-full max-w-md rounded-xl p-6 flex flex-col gap-5"
-          style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border-subtle)' }}
-          onClick={(e) => e.stopPropagation()}
+          className="flex flex-col gap-2 rounded-lg px-3 py-2.5 text-xs"
+          style={{
+            backgroundColor: 'rgba(59, 130, 246, 0.08)',
+            border: '1px solid rgba(59, 130, 246, 0.2)',
+          }}
         >
-          {/* Header */}
           <div className="flex items-center justify-between">
-            <h2 className="text-primary text-base font-semibold">Add Account</h2>
-            <button onClick={onClose} disabled={loading} className="text-secondary hover:text-primary transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
-              <X size={18} />
+            <div className="flex flex-col gap-0.5">
+              <span className="text-secondary">Whitelist these IPs when creating your API key</span>
+              <span className="text-primary font-mono text-sm">{WHITELIST_IPS}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleCopyIp}
+              className="ml-3 p-1.5 rounded-md transition-colors hover:bg-white/5"
+              title="Copy IPs"
+            >
+              {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} className="text-secondary" />}
             </button>
           </div>
+        </div>
 
-          {/* Whitelist IP Note */}
-          <div
-            className="flex flex-col gap-2 rounded-lg px-3 py-2.5 text-xs"
-            style={{
-              backgroundColor: 'rgba(59, 130, 246, 0.08)',
-              border: '1px solid rgba(59, 130, 246, 0.2)',
-            }}
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex flex-col gap-0.5">
-                <span className="text-secondary">Whitelist these IPs when creating your API key</span>
-                <span className="text-primary font-mono text-sm">{WHITELIST_IPS}</span>
-              </div>
-              <button
-                type="button"
-                onClick={handleCopyIp}
-                className="ml-3 p-1.5 rounded-md transition-colors hover:bg-white/5"
-                title="Copy IPs"
-              >
-                {copied ? <Check size={14} className="text-green-400" /> : <Copy size={14} className="text-secondary" />}
-              </button>
-            </div>
-          </div>
-
-          {/* API Permissions Note */}
-          {exchange === 'Gate' && (
-            <div
-              className="flex flex-col gap-1.5 rounded-lg px-3 py-2.5 text-xs"
-              style={{
-                backgroundColor: 'rgba(234, 179, 8, 0.08)',
-                border: '1px solid rgba(234, 179, 8, 0.2)',
-              }}
-            >
-              <span className="text-secondary">Required API permissions for Gate</span>
-              <ul className="text-primary text-xs list-disc list-inside flex flex-col gap-0.5">
-                <li>Spot/Margin — Read & Write</li>
-                <li>Account — Read</li>
-                <li>Perpetual Contract — Read & Write</li>
-              </ul>
-            </div>
-          )}
-          {exchange === 'OKX' && (
-            <div
-              className="flex flex-col gap-1.5 rounded-lg px-3 py-2.5 text-xs"
-              style={{
-                backgroundColor: 'rgba(234, 179, 8, 0.08)',
-                border: '1px solid rgba(234, 179, 8, 0.2)',
-              }}
-            >
-              <span className="text-secondary">Required API permissions for OKX</span>
-              <ul className="text-primary text-xs list-disc list-inside">
-                <li>Trade — must be enabled</li>
-              </ul>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4" style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.15s' }}>
-            {/* Exchange */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-secondary text-xs uppercase tracking-wide">Exchange</label>
-              <div className="relative">
-                <select
-                  required
-                  value={exchange}
-                  onChange={(e) => setExchange(e.target.value)}
-                  className="w-full text-primary text-sm rounded-lg px-3 py-2.5 appearance-none pr-8"
+        {/* Exchange Selection - List Layout */}
+        <div className="flex flex-col gap-2">
+          <label className="text-secondary text-xs uppercase tracking-wide">Select Exchange</label>
+          <div className="grid grid-cols-2 gap-2">
+            {exchanges.map((ex) => {
+              const isSelected = exchange === ex.exchange_name;
+              return (
+                <button
+                  key={ex.exchange_name}
+                  type="button"
+                  onClick={() => setExchange(ex.exchange_name)}
+                  className={`
+                    relative flex items-center gap-3 p-3 rounded-lg border-2 transition-all
+                    ${isSelected 
+                      ? 'border-blue-500 bg-blue-500/10' 
+                      : 'border-transparent hover:border-white/20 hover:bg-white/5'
+                    }
+                  `}
                   style={{
-                    backgroundColor: 'var(--color-bg-page)',
-                    border: '1px solid var(--color-border-subtle)',
-                    outline: 'none',
+                    backgroundColor: isSelected ? undefined : 'var(--color-bg-page)',
                   }}
                 >
-                  <option value="" disabled style={{ backgroundColor: '#22223a' }}>Select exchange</option>
-                  {EXCHANGES.map((ex) => (
-                    <option key={ex} value={ex} style={{ backgroundColor: '#22223a' }}>{ex}</option>
-                  ))}
-                </select>
-                <svg
-                  className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-secondary"
-                  width="12" height="12" viewBox="0 0 12 12" fill="currentColor"
-                >
-                  <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </div>
-            </div>
+                  {/* Selected indicator */}
+                  {isSelected && (
+                    <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-blue-500" />
+                  )}
+                  
+                  {/* Logo */}
+                  <div className="w-10 h-10 rounded-md flex items-center justify-center overflow-hidden bg-white/5">
+                    <img
+                      src={ex.exchange_thumbnail}
+                      alt={ex.exchange_name}
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  
+                  {/* Name */}
+                  <span className={`text-sm font-medium ${isSelected ? 'text-blue-400' : 'text-primary'}`}>
+                    {ex.exchange_name.charAt(0) + ex.exchange_name.slice(1).toLowerCase()}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
-            {/* API Key */}
-            <div className="flex flex-col gap-1.5">
-              <label className="text-secondary text-xs uppercase tracking-wide">API Key</label>
-              <input
-                required
-                type="text"
-                value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter API key"
-                className="text-primary text-sm rounded-lg px-3 py-2.5"
-                style={{
-                  backgroundColor: 'var(--color-bg-page)',
-                  border: '1px solid var(--color-border-subtle)',
-                  outline: 'none',
-                }}
-                onFocus={(e) => (e.target.style.borderColor = 'var(--color-accent-green-dim)')}
-                onBlur={(e) => (e.target.style.borderColor = 'var(--color-border-subtle)')}
-              />
-            </div>
+        {/* API Permissions Note */}
+        {exchange === 'GATE' && (
+          <div
+            className="flex flex-col gap-1.5 rounded-lg px-3 py-2.5 text-xs"
+            style={{
+              backgroundColor: 'rgba(234, 179, 8, 0.08)',
+              border: '1px solid rgba(234, 179, 8, 0.2)',
+            }}
+          >
+            <span className="text-secondary">Required API permissions for Gate</span>
+            <ul className="text-primary text-xs list-disc list-inside flex flex-col gap-0.5">
+              <li>Spot/Margin — Read & Write</li>
+              <li>Account — Read</li>
+              <li>Perpetual Contract — Read & Write</li>
+            </ul>
+          </div>
+        )}
+        {exchange === 'OKX' && (
+          <div
+            className="flex flex-col gap-1.5 rounded-lg px-3 py-2.5 text-xs"
+            style={{
+              backgroundColor: 'rgba(234, 179, 8, 0.08)',
+              border: '1px solid rgba(234, 179, 8, 0.2)',
+            }}
+          >
+            <span className="text-secondary">Required API permissions for OKX</span>
+            <ul className="text-primary text-xs list-disc list-inside">
+              <li>Trade — must be enabled</li>
+            </ul>
+          </div>
+        )}
 
-            {/* API Secret */}
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4 pt-2" style={{ opacity: loading ? 0.6 : 1, transition: 'opacity 0.15s' }}>
+          {/* API Key */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-secondary text-xs uppercase tracking wide">API Key</label>
+            <input
+              required
+              type="text"
+              value={apiKey}
+              onChange={(e) => setApiKey(e.target.value)}
+              placeholder="Enter API key"
+              className="text-primary text-sm rounded-lg px-3 py-2.5"
+              style={{
+                backgroundColor: 'var(--color-bg-page)',
+                border: '1px solid var(--color-border-subtle)',
+                outline: 'none',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = 'var(--color-accent-green-dim)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--color-border-subtle)')}
+            />
+          </div>
+
+          {/* API Secret */}
+          <div className="flex flex-col gap-1.5">
+            <label className="text-secondary text-xs uppercase tracking-wide">API Secret</label>
+            <input
+              required
+              type="password"
+              value={apiSecret}
+              onChange={(e) => setApiSecret(e.target.value)}
+              placeholder="Enter API secret"
+              className="text-primary text-sm rounded-lg px-3 py-2.5"
+              style={{
+                backgroundColor: 'var(--color-bg-page)',
+                border: '1px solid var(--color-border-subtle)',
+                outline: 'none',
+              }}
+              onFocus={(e) => (e.target.style.borderColor = 'var(--color-accent-green-dim)')}
+              onBlur={(e) => (e.target.style.borderColor = 'var(--color-border-subtle)')}
+            />
+          </div>
+
+          {/* Passphrase — OKX, Bitget, BitMart only */}
+          {requiresPassphrase && (
             <div className="flex flex-col gap-1.5">
-              <label className="text-secondary text-xs uppercase tracking-wide">API Secret</label>
+              <label className="text-secondary text-xs uppercase tracking-wide">
+                {isBitmart ? 'API Memo (UID)' : isBitget ? 'API Password' : 'API Passphrase'}
+              </label>
               <input
                 required
                 type="password"
-                value={apiSecret}
-                onChange={(e) => setApiSecret(e.target.value)}
-                placeholder="Enter API secret"
+                value={passphrase}
+                onChange={(e) => setPassphrase(e.target.value)}
+                placeholder={isBitmart ? 'Enter API memo/uid' : isBitget ? 'Enter API password' : 'Enter API passphrase'}
                 className="text-primary text-sm rounded-lg px-3 py-2.5"
                 style={{
                   backgroundColor: 'var(--color-bg-page)',
@@ -231,52 +304,31 @@ export default function AddAccountModal({ open, onClose }: AddAccountModalProps)
                 onBlur={(e) => (e.target.style.borderColor = 'var(--color-border-subtle)')}
               />
             </div>
+          )}
 
-            {/* Passphrase — OKX only */}
-            {isOKX && (
-              <div className="flex flex-col gap-1.5">
-                <label className="text-secondary text-xs uppercase tracking-wide">API Passphrase</label>
-                <input
-                  required
-                  type="password"
-                  value={passphrase}
-                  onChange={(e) => setPassphrase(e.target.value)}
-                  placeholder="Enter API passphrase"
-                  className="text-primary text-sm rounded-lg px-3 py-2.5"
-                  style={{
-                    backgroundColor: 'var(--color-bg-page)',
-                    border: '1px solid var(--color-border-subtle)',
-                    outline: 'none',
-                  }}
-                  onFocus={(e) => (e.target.style.borderColor = 'var(--color-accent-green-dim)')}
-                  onBlur={(e) => (e.target.style.borderColor = 'var(--color-border-subtle)')}
-                />
-              </div>
-            )}
-
-            {/* Actions */}
-            <div className="flex gap-3 pt-1">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={loading}
-                className="flex-1 py-2.5 rounded-lg text-sm font-medium text-secondary transition-colors hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed"
-                style={{ border: '1px solid var(--color-border-subtle)', backgroundColor: 'transparent' }}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                style={{ backgroundColor: 'var(--color-accent-green-dim)', color: '#fff' }}
-              >
-                {loading && <Loader2 size={14} className="animate-spin" />}
-                {loading ? 'Adding...' : 'Add Account'}
-              </button>
-            </div>
-          </form>
-        </div>
+          {/* Actions */}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="flex-1 py-2.5 rounded-lg text-sm font-medium text-secondary transition-colors hover:text-primary disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ border: '1px solid var(--color-border-subtle)', backgroundColor: 'transparent' }}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 py-2.5 rounded-lg text-sm font-semibold transition-opacity hover:opacity-90 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              style={{ backgroundColor: 'var(--color-accent-green-dim)', color: '#fff' }}
+            >
+              {loading && <Loader2 size={14} className="animate-spin" />}
+              {loading ? 'Adding...' : 'Add Account'}
+            </button>
+          </div>
+        </form>
       </div>
-    )
-  }
+    </div>
+  )
+}

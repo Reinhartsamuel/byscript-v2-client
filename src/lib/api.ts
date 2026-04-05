@@ -1,5 +1,36 @@
 import { BASE_URL } from './constants'
 
+// 401 handler - logout and redirect to login
+function handleUnauthorized() {
+  // Clear local storage
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  
+  // Dispatch custom event for other components to listen (optional)
+  window.dispatchEvent(new CustomEvent('auth:unauthorized'))
+  
+  // Redirect to login page
+  window.location.href = '/login'
+}
+
+async function fetchWithAuth(url: string, options: RequestInit = {}) {
+  const token = localStorage.getItem('token')
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(token && { 'Authorization': `Bearer ${token}` }),
+    ...options.headers,
+  }
+
+  const res = await fetch(url, { ...options, headers })
+
+  if (res.status === 401) {
+    handleUnauthorized()
+    throw new Error('Unauthorized - please log in again')
+  }
+
+  return res
+}
+
 export async function loginWithFirebaseToken(idToken: string) {
   const res = await fetch(`${BASE_URL}/user/login`, {
     method: 'POST',
@@ -17,15 +48,14 @@ export async function loginWithFirebaseToken(idToken: string) {
 
 
 export async function registerExchangeAccount(payload: {
-  exchange: 'gate' | 'okx' | 'hyperliquid' | 'tokocrypto';
+  exchange: 'gate' | 'okx' | 'hyperliquid' | 'tokocrypto' | 'bitget' | 'mexc' | 'bitmart';
   api_key: string;
   api_secret: string;
   api_passphrase?: string;
   user_id: number;
 }) {
-  const res = await fetch(`${BASE_URL}/${payload.exchange}/register-user`, {
+  const res = await fetchWithAuth(`${BASE_URL}/${payload.exchange}/register-user`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       api_key: payload.api_key,
       api_secret: payload.api_secret,
@@ -49,10 +79,7 @@ export async function registerExchangeAccount(payload: {
 
 
 export async function getAccounts() {
-  const res = await fetch(`${BASE_URL}/user/accounts`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-  })
+  const res = await fetchWithAuth(`${BASE_URL}/user/accounts`)
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
   return data;
@@ -64,20 +91,14 @@ const authHeaders = () => ({
 })
 
 export async function getAutotraders() {
-  const res = await fetch(`${BASE_URL}/user/autotraders`, {
-    method: 'GET',
-    headers: authHeaders(),
-  })
+  const res = await fetchWithAuth(`${BASE_URL}/user/autotraders`, { headers: authHeaders() })
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
   return data;
 }
 
 export async function getTradingPlans() {
-  const res = await fetch(`${BASE_URL}/user/trading-plans`, {
-    method: 'GET',
-    headers: authHeaders(),
-  })
+  const res = await fetchWithAuth(`${BASE_URL}/user/trading-plans`, { headers: authHeaders() })
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
   return data;
@@ -90,7 +111,7 @@ export async function createTradingPlan(payload: {
   visibility?: string;
   pairs: { base_asset: string; quote_asset: string; symbol: string }[];
 }) {
-  const res = await fetch(`${BASE_URL}/user/trading-plans`, {
+  const res = await fetchWithAuth(`${BASE_URL}/user/trading-plans`, {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify(payload),
@@ -101,7 +122,7 @@ export async function createTradingPlan(payload: {
 }
 
 export async function deleteAutotrader(id: string) {
-  const res = await fetch(`${BASE_URL}/user/autotraders/${id}`, {
+  const res = await fetchWithAuth(`${BASE_URL}/user/autotraders/${id}`, {
     method: 'DELETE',
     headers: authHeaders(),
   })
@@ -111,7 +132,7 @@ export async function deleteAutotrader(id: string) {
 }
 
 export async function getAutotraderDetail(id: string) {
-  const res = await fetch(`${BASE_URL}/user/autotraders/${id}`, {
+  const res = await fetchWithAuth(`${BASE_URL}/user/autotraders/${id}`, {
     method: 'GET',
     headers: authHeaders(),
   })
@@ -121,7 +142,7 @@ export async function getAutotraderDetail(id: string) {
 }
 
 export async function getAutotraderTrades(id: string) {
-  const res = await fetch(`${BASE_URL}/user/autotraders/${id}/trades`, {
+  const res = await fetchWithAuth(`${BASE_URL}/user/autotraders/${id}/trades`, {
     method: 'GET',
     headers: authHeaders(),
   })
@@ -131,7 +152,7 @@ export async function getAutotraderTrades(id: string) {
 }
 
 export async function updateAutotraderStatus(id: string, status: 'active' | 'stopped') {
-  const res = await fetch(`${BASE_URL}/user/autotraders/${id}/status`, {
+  const res = await fetchWithAuth(`${BASE_URL}/user/autotraders/${id}/status`, {
     method: 'PATCH',
     headers: authHeaders(),
     body: JSON.stringify({ status }),
@@ -163,7 +184,7 @@ export async function getTradeHistory(params: {
   if (params.limit != null) query.set('limit', String(params.limit));
   if (params.offset != null) query.set('offset', String(params.offset));
 
-  const res = await fetch(`${BASE_URL}/user/trades?${query.toString()}`, {
+  const res = await fetchWithAuth(`${BASE_URL}/user/trades?${query.toString()}`, {
     method: 'GET',
     headers: authHeaders(),
   })
@@ -211,10 +232,15 @@ export interface TradeHistoryItem {
 
 export function subscribeToTrades(onData: (trades: TradeHistoryItem[]) => void): () => void {
   const controller = new AbortController()
+  const token = localStorage.getItem('token')
   fetch(`${BASE_URL}/user/sse/trades`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    headers: { Authorization: `Bearer ${token}` },
     signal: controller.signal,
   }).then(async (res) => {
+    if (res.status === 401) {
+      handleUnauthorized()
+      return
+    }
     if (!res.body) return
     const reader = res.body.getReader()
     const decoder = new TextDecoder()
@@ -244,10 +270,15 @@ export function subscribeToAutotraderTrades(
   onData: (trades: AutotraderTradeRow[]) => void,
 ): () => void {
   const controller = new AbortController()
+  const token = localStorage.getItem('token')
   fetch(`${BASE_URL}/user/sse/autotraders/${id}/trades`, {
-    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+    headers: { Authorization: `Bearer ${token}` },
     signal: controller.signal,
   }).then(async (res) => {
+    if (res.status === 401) {
+      handleUnauthorized()
+      return
+    }
     if (!res.body) return
     const reader = res.body.getReader()
     const decoder = new TextDecoder()
@@ -286,7 +317,7 @@ export async function createAutotraders(payload: {
     position_mode: string;
   }[];
 }) {
-  const res = await fetch(`${BASE_URL}/user/autotraders`, {
+  const res = await fetchWithAuth(`${BASE_URL}/user/autotraders`, {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify(payload),
