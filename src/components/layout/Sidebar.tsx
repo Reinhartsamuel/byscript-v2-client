@@ -8,8 +8,8 @@ const NAV_ITEMS = [
   { to: '/accounts', label: 'Accounts', icon: Wallet },
   { to: '/autotraders', label: 'Autotraders', icon: Bot },
   { to: '/trade-history', label: 'Trade History', icon: History },
-  { to: 'https://v2.byscript.io/screener', label: 'Screener', icon: Tv },
-  { to: 'https://v2.byscript.io/chart', label: 'Chart', icon: LineChart },
+  { to: 'https://v2.byscript.io/web/screener', label: 'Screener', icon: Tv },
+  { to: 'https://v2.byscript.io/web/chart', label: 'Chart', icon: LineChart },
 ] as const
 
 export default function Sidebar() {
