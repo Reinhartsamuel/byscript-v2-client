@@ -1,8 +1,16 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import type { User } from 'firebase/auth'
-import { onAuthStateChanged, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth'
+import { onIdTokenChanged, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth'
 import { auth, googleProvider } from '@/lib/firebase'
 import { loginWithFirebaseToken } from '@/lib/api'
+
+function setSharedAuthCookie(idToken: string) {
+  document.cookie = `fb_id_token=${idToken}; path=/; domain=.byscript.io; SameSite=Lax; Secure; Max-Age=3600`
+}
+
+function clearSharedAuthCookie() {
+  document.cookie = `fb_id_token=; path=/; domain=.byscript.io; Max-Age=0`
+}
 
 interface AuthContextType {
   user: User | null
@@ -18,9 +26,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onIdTokenChanged(auth, async (firebaseUser) => {
       setUser(firebaseUser)
       setLoading(false)
+      if (firebaseUser) {
+        const idToken = await firebaseUser.getIdToken()
+        setSharedAuthCookie(idToken)
+      } else {
+        clearSharedAuthCookie()
+      }
     })
     return unsubscribe
   }, [])
@@ -41,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await firebaseSignOut(auth)
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    clearSharedAuthCookie()
   }
 
   return (
