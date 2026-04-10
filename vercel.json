@@ -1,3 +1,16 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/web/:path*",
+      "destination": "https://byscript-web.vercel.app/web/:path*"
+    },
+    {
+      "source": "/admin/:path*",
+      "destination": "https://byscript-web.vercel.app/admin/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
 }

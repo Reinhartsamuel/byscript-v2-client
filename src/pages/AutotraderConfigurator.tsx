@@ -637,10 +637,10 @@ export default function AutotraderConfigurator() {
   const { data: tradingPlans = [] } = useTradingPlans()
 
   const selectedAccount = accounts.find((a) => a.id === accountId)
-  const selectedPlan = tradingPlans.find((p) => String(p.id) === tradingPlanId)
+  const selectedTradingPlan = tradingPlans.find((p) => String(p.id) === tradingPlanId)
 
   // Available pairs come from the selected trading plan
-  const availablePairs = selectedPlan?.pairs || []
+  const availablePairs = selectedTradingPlan?.pairs || []
 
   const createMutation = useMutation({
     mutationFn: createAutotraders,
@@ -811,7 +811,7 @@ export default function AutotraderConfigurator() {
               <p className="text-muted text-xs mt-0.5">Each pair represents an individual autotrader instance.</p>
             </div>
 
-            {!selectedPlan ? (
+            {!selectedTradingPlan ? (
               <p className="text-muted text-xs py-2">Select a trading plan first to configure pairs.</p>
             ) : (
               <>
@@ -988,7 +988,7 @@ export default function AutotraderConfigurator() {
           <PreviewPanel
             market={market}
             account={selectedAccount}
-            plan={selectedPlan}
+            plan={selectedTradingPlan}
             pairs={pairs}
           />
         </div>

@@ -394,8 +394,9 @@ export interface RecentExecution {
   price: number
   size: number
   sizeUnit: string
-  status: 'OPEN' | 'FILLED' | 'PARTIAL' | 'FAILED'
+  status: 'OPEN' | 'FILLED' | 'PARTIAL' | 'FAILED' | 'WAITING_POSITION' | 'WAITING_TARGETS'
   source: string
+  pnl?: number | null,
 }
 
 export const RECENT_EXECUTIONS: RecentExecution[] = [

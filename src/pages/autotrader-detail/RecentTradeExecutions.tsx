@@ -12,10 +12,11 @@ export default function RecentTradeExecutions({ data }: RecentTradeExecutionsPro
   }
 
   const getStatusColor = (status: string) => {
-    if (status === 'OPEN') return 'text-green'
-    if (status === 'FILLED') return 'text-primary'
+    if (status === 'OPEN' || status === 'WAITING_POSITION') return 'text-orange-500'
+    if (status === 'FILLED' || status === 'WAITING_TARGETS') return 'text-green font-bold'
     if (status === 'PARTIAL') return ''
-    if (status === 'FAILED') return 'text-red'
+    if (status === 'FAILED') return 'text-red-600'
+    if (status === 'CLOSED') return 'text-gray-600'
     return 'text-primary'
   }
 
@@ -35,7 +36,7 @@ export default function RecentTradeExecutions({ data }: RecentTradeExecutionsPro
       {/* Column headers */}
       <div
         className="grid text-muted text-xs uppercase tracking-wider mb-2"
-        style={{ gridTemplateColumns: '1fr 0.8fr 0.7fr 1fr 0.9fr 0.8fr 0.8fr' }}
+        style={{ gridTemplateColumns: '1fr 0.8fr 0.7fr 1fr 0.9fr 0.8fr 0.7fr' }}
       >
         <span>Timestamp</span>
         <span className="text-center">Action</span>
@@ -43,7 +44,7 @@ export default function RecentTradeExecutions({ data }: RecentTradeExecutionsPro
         <span className="text-right">Price</span>
         <span className="text-right">Size</span>
         <span className="text-center">Status</span>
-        <span className="text-center">Source</span>
+        <span className="text-right">PnL USD</span>
       </div>
 
       {/* Rows */}
@@ -52,8 +53,9 @@ export default function RecentTradeExecutions({ data }: RecentTradeExecutionsPro
           <div
             key={row.id}
             className="grid py-3"
+            onClick={() => console.log(row)}
             style={{
-              gridTemplateColumns: '1fr 0.8fr 0.7fr 1fr 0.9fr 0.8fr 0.8fr',
+              gridTemplateColumns: '1fr 0.8fr 0.7fr 1fr 0.9fr 0.8fr 0.7fr',
               borderTop: i > 0 ? '1px solid var(--color-border-subtle)' : 'none',
             }}
           >
@@ -71,7 +73,7 @@ export default function RecentTradeExecutions({ data }: RecentTradeExecutionsPro
 
             {/* Size */}
             <span className="text-primary text-xs text-right">
-              {row.size.toFixed(3)} {row.sizeUnit}
+              {row.size} {row.sizeUnit}
             </span>
 
             {/* Status */}
@@ -82,8 +84,10 @@ export default function RecentTradeExecutions({ data }: RecentTradeExecutionsPro
               {row.status}
             </span>
 
-            {/* Source */}
-            <span className="text-primary text-xs text-center">{row.source}</span>
+            {/* PnL */}
+            <span className={`text-xs text-right ${row.pnl == null ? 'text-muted' : Number(row.pnl) >= 0 ? 'text-green' : 'text-red'}`}>
+              {row.pnl == null ? '—' : `$ ${Number(row.pnl) >= 0 ? '+' : ''}${Number(row.pnl).toFixed(4)}`}
+            </span>
           </div>
         ))}
       </div>

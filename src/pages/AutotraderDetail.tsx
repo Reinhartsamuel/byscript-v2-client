@@ -222,8 +222,9 @@ export default function AutotraderDetail() {
     price: Number(t.open_fill_price || t.price || 0),
     size: Number(t.size || 0),
     sizeUnit: autotrader.symbol?.replace(/USDT|USDC|USD/, '') || '',
-    status: (t.status?.toUpperCase() || 'OPEN') as 'OPEN' | 'FILLED' | 'PARTIAL' | 'FAILED',
+    status: (t.status?.toUpperCase() || 'OPEN') as 'OPEN' | 'FILLED' | 'PARTIAL' | 'FAILED' | 'WAITING_POSITION' | 'WAITING_TARGETS',
     source: 'STRATEGY',
+    pnl: Number(t.pnl || 0),
   }))
 
   return (
