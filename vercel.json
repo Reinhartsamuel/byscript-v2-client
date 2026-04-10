@@ -9,11 +9,6 @@
     { "source": "/admin-screener/:path*", "destination": "https://byscript-web.vercel.app/admin-screener/:path*" },
     { "source": "/login-screener", "destination": "https://byscript-web.vercel.app/login-screener" },
     { "source": "/register-screener", "destination": "https://byscript-web.vercel.app/register-screener" },
-    { "source": "/(.*)", "destination": "/index.html" },
-    { "source": "/web/screener/:path*", "destination": "https://byscript-web.vercel.app/web/screener/:path*" },
-    { "source": "/web/screener", "destination": "https://byscript-web.vercel.app/web/screener" },
-    { "source": "/web/chart", "destination": "https://byscript-web.vercel.app/web/chart" },
-    { "source": "/web/signals", "destination": "https://byscript-web.vercel.app/web/signals" },
-    { "source": "/web/settings-screener", "destination": "https://byscript-web.vercel.app/web/settings-screener" }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
