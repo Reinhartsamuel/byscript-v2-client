@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
-import { LayoutDashboard, Wallet, Bot, History, ChevronLeft } from 'lucide-react'
+import { LayoutDashboard, Wallet, Bot, History, ChevronLeft, Tv, LineChart } from 'lucide-react'
 import { useSidebarStore, useNavStore } from '@/store/index'
 
 const NAV_ITEMS = [
@@ -8,6 +8,8 @@ const NAV_ITEMS = [
   { to: '/accounts', label: 'Accounts', icon: Wallet },
   { to: '/autotraders', label: 'Autotraders', icon: Bot },
   { to: '/trade-history', label: 'Trade History', icon: History },
+  { to: 'https://v2.byscript.io/screener', label: 'Screener', icon: Tv },
+  { to: 'https://v2.byscript.io/chart', label: 'Chart', icon: LineChart },
 ] as const
 
 export default function Sidebar() {
