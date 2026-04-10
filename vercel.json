@@ -1,11 +1,11 @@
 {
   "rewrites": [
     { "source": "/_next/:path*", "destination": "https://byscript-web.vercel.app/_next/:path*" },
-    { "source": "/screener/:path*", "destination": "https://byscript-web.vercel.app/web/screener/:path*" },
-    { "source": "/screener", "destination": "https://byscript-web.vercel.app/web/screener" },
-    { "source": "/chart", "destination": "https://byscript-web.vercel.app/web/chart" },
-    { "source": "/signals", "destination": "https://byscript-web.vercel.app/web/signals" },
-    { "source": "/settings-screener", "destination": "https://byscript-web.vercel.app/web/settings-screener" },
+    { "source": "/screener/:path*", "destination": "https://byscript-web.vercel.app/screener/:path*" },
+    { "source": "/screener", "destination": "https://byscript-web.vercel.app/screener" },
+    { "source": "/chart", "destination": "https://byscript-web.vercel.app/chart" },
+    { "source": "/signals", "destination": "https://byscript-web.vercel.app/signals" },
+    { "source": "/settings-screener", "destination": "https://byscript-web.vercel.app/settings-screener" },
     { "source": "/admin-screener/:path*", "destination": "https://byscript-web.vercel.app/admin-screener/:path*" },
     { "source": "/login-screener", "destination": "https://byscript-web.vercel.app/login-screener" },
     { "source": "/register-screener", "destination": "https://byscript-web.vercel.app/register-screener" },
