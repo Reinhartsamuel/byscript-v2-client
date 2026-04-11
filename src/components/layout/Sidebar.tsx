@@ -4,13 +4,13 @@ import { LayoutDashboard, Wallet, Bot, History, ChevronLeft, Tv, LineChart } fro
 import { useSidebarStore, useNavStore } from '@/store/index'
 
 const NAV_ITEMS = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/accounts', label: 'Accounts', icon: Wallet },
-  { to: '/autotraders', label: 'Autotraders', icon: Bot },
-  { to: '/trade-history', label: 'Trade History', icon: History },
-  { to: 'https://v2.byscript.io/web/screener', label: 'Screener', icon: Tv },
-  { to: 'https://v2.byscript.io/web/chart', label: 'Chart', icon: LineChart },
-] as const
+  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, external: false },
+  { to: '/accounts', label: 'Accounts', icon: Wallet, external: false },
+  { to: '/autotraders', label: 'Autotraders', icon: Bot, external: false },
+  { to: '/trade-history', label: 'Trade History', icon: History, external: false },
+  { to: 'https://v2.byscript.io/screener', label: 'Screener', icon: Tv, external: true },
+  { to: 'https://v2.byscript.io/chart', label: 'Chart', icon: LineChart, external: true },
+]
 
 export default function Sidebar() {
   const collapsed = useSidebarStore((s) => s.collapsed)
@@ -80,38 +80,23 @@ export default function Sidebar() {
       <nav className="flex-1 py-3 flex flex-col gap-0.5" style={{ padding: '12px 8px' }}>
         {NAV_ITEMS.map((item) => {
           const Icon = item.icon
-          const isActive = location.pathname.startsWith(item.to)
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              title={collapsed ? item.label : undefined}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '10px',
-                padding: collapsed ? '9px 0' : '9px 10px',
-                justifyContent: collapsed ? 'center' : 'flex-start',
-                borderRadius: '5px',
-                transition: 'all 0.15s ease',
-                color: isActive ? 'var(--color-accent)' : 'var(--color-text-muted)',
-                backgroundColor: isActive ? 'var(--color-accent-bg)' : 'transparent',
-                border: isActive ? '1px solid rgba(0,229,209,0.12)' : '1px solid transparent',
-                position: 'relative',
-              }}
-              onMouseEnter={e => {
-                if (!isActive) {
-                  e.currentTarget.style.color = 'var(--color-text-secondary)'
-                  e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)'
-                }
-              }}
-              onMouseLeave={e => {
-                if (!isActive) {
-                  e.currentTarget.style.color = 'var(--color-text-muted)'
-                  e.currentTarget.style.backgroundColor = 'transparent'
-                }
-              }}
-            >
+          const isActive = !item.external && location.pathname.startsWith(item.to)
+          const linkStyle = {
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            padding: collapsed ? '9px 0' : '9px 10px',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            borderRadius: '5px',
+            transition: 'all 0.15s ease',
+            color: isActive ? 'var(--color-accent)' : 'var(--color-text-muted)',
+            backgroundColor: isActive ? 'var(--color-accent-bg)' : 'transparent',
+            border: isActive ? '1px solid rgba(0,229,209,0.12)' : '1px solid transparent',
+            position: 'relative' as const,
+            textDecoration: 'none',
+          }
+          const innerContent = (
+            <>
               {/* Active indicator dot */}
               {isActive && (
                 <span style={{
@@ -152,6 +137,44 @@ export default function Sidebar() {
                   {item.label}
                 </span>
               )}
+            </>
+          )
+          const hoverOn = (e: React.MouseEvent<HTMLElement>) => {
+            if (!isActive) {
+              e.currentTarget.style.color = 'var(--color-text-secondary)'
+              e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)'
+            }
+          }
+          const hoverOff = (e: React.MouseEvent<HTMLElement>) => {
+            if (!isActive) {
+              e.currentTarget.style.color = 'var(--color-text-muted)'
+              e.currentTarget.style.backgroundColor = 'transparent'
+            }
+          }
+          if (item.external) {
+            return (
+              <a
+                key={item.to}
+                href={item.to}
+                title={collapsed ? item.label : undefined}
+                style={linkStyle}
+                onMouseEnter={hoverOn}
+                onMouseLeave={hoverOff}
+              >
+                {innerContent}
+              </a>
+            )
+          }
+          return (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              title={collapsed ? item.label : undefined}
+              style={linkStyle}
+              onMouseEnter={hoverOn}
+              onMouseLeave={hoverOff}
+            >
+              {innerContent}
             </NavLink>
           )
         })}
