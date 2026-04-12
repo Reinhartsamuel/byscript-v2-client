@@ -10,6 +10,7 @@
     { "source": "/admin-screener/:path*", "destination": "https://byscript-web.vercel.app/admin-screener/:path*" },
     { "source": "/login-screener", "destination": "https://byscript-web.vercel.app/login-screener" },
     { "source": "/register-screener", "destination": "https://byscript-web.vercel.app/register-screener" },
+    { "source": "/api/backend/:path*", "destination": "https://byscript-web.vercel.app/api/backend/:path*" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
