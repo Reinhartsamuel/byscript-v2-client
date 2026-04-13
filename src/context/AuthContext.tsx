@@ -3,6 +3,7 @@ import type { User } from 'firebase/auth'
 import { onIdTokenChanged, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth'
 import { auth, googleProvider } from '@/lib/firebase'
 import { loginWithFirebaseToken } from '@/lib/api'
+import Cookies from 'js-cookie'
 
 function setSharedAuthCookie(idToken: string) {
   document.cookie = `fb_id_token=${idToken}; path=/; domain=.byscript.io; SameSite=Lax; Secure; Max-Age=3600`
@@ -55,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await firebaseSignOut(auth)
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    Cookies.remove('fb_id_token')
     clearSharedAuthCookie()
   }
 

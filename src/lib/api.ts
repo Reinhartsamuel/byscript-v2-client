@@ -1,4 +1,5 @@
 import { BASE_URL } from './constants'
+import Cookies from 'js-cookie'
 
 // 401 handler - logout and redirect to login
 function handleUnauthorized() {
@@ -6,6 +7,10 @@ function handleUnauthorized() {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
   
+
+  // clear token fb_id_token from cookies
+  Cookies.remove('fb_id_token')
+
   // Dispatch custom event for other components to listen (optional)
   window.dispatchEvent(new CustomEvent('auth:unauthorized'))
   

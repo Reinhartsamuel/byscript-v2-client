@@ -15,6 +15,7 @@
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",
     "firebase": "^12.9.0",
+    "js-cookie": "^3.0.5",
     "lucide-react": "^0.563.0",
     "react": "^19.2.4",
     "react-chartjs-2": "^5.3.1",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.18",
+    "@types/js-cookie": "^3.0.6",
     "@types/node": "^25.2.0",
     "@types/react": "^19.2.11",
     "@types/react-dom": "^19.2.3",
