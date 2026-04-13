@@ -32,6 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false)
       if (firebaseUser) {
         const idToken = await firebaseUser.getIdToken()
+        console.log('getting fb_id_token:::::::::', idToken)
         setSharedAuthCookie(idToken)
       } else {
         clearSharedAuthCookie()
@@ -43,6 +44,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signInWithGoogle() {
     const credential = await signInWithPopup(auth, googleProvider)
     const idToken = await credential.user.getIdToken()
+    console.log('creating fb_id_token on sign in:::::::::', idToken)
+    setSharedAuthCookie(idToken)
+
+    console.log('requesting screeners')
+    const res = await fetch('https://byscript-screener-backend-production.up.railway.app/screeners', {
+      headers: {
+        'Authorization': `Bearer ${idToken}`
+      }
+    })
+    const data = await res.json()
+    console.log('screeners', data)
     try {
       const res = await loginWithFirebaseToken(idToken)
       localStorage.setItem('token', res.token)
