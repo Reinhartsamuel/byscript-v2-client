@@ -326,3 +326,10 @@ export async function createAutotraders(payload: {
   if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
   return data;
 }
+
+export async function getDashboardData(period: string = '7d') {
+  const res = await fetchWithAuth(`${BASE_URL}/user/dashboard?period=${period}`)
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
+  return data;
+}

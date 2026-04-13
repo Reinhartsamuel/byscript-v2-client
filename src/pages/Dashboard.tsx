@@ -5,7 +5,7 @@ import TradeHistoryCard from '@/pages/dashboard/TradeHistoryCard'
 import DataOverview from '@/pages/dashboard/DataOverview'
 import BecomeAffiliate from '@/pages/dashboard/BecomeAffiliate'
 import { useEffect, useState } from 'react'
-import { BASE_URL } from '@/lib/constants'
+import { getDashboardData as fetchDashboardData } from '@/lib/api'
 
 export interface EquitySummaryData {
   total_balance: number
@@ -85,19 +85,15 @@ export default function Dashboard() {
   const [data, setData] = useState<DashboardData>(EMPTY_DASHBOARD)
 
   useEffect(() => {
-    async function getDashboardData() {
+    async function loadDashboardData() {
       try {
-        const token = localStorage.getItem('token')
-        const res = await fetch(`${BASE_URL}/user/dashboard?period=7d`, {
-          headers: { 'Authorization': `Bearer ${token}` },
-        })
-        const json = await res.json()
+        const json = await fetchDashboardData('7d')
         setData({ ...EMPTY_DASHBOARD, ...json })
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
       }
     }
-    getDashboardData()
+    loadDashboardData()
   }, [])
 
   return (
