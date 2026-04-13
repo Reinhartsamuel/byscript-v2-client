@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import type { User } from 'firebase/auth'
 import { onIdTokenChanged, signInWithPopup, signOut as firebaseSignOut } from 'firebase/auth'
 import { auth, googleProvider } from '@/lib/firebase'
-import { loginWithFirebaseToken } from '@/lib/api'
+import { loginToBackendWithFirebaseToken } from '@/lib/api'
 import Cookies from 'js-cookie'
 
 function setSharedAuthCookie(idToken: string) {
@@ -56,7 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const data = await res.json()
     console.log('screeners', data)
     try {
-      const res = await loginWithFirebaseToken(idToken)
+      const res = await loginToBackendWithFirebaseToken(idToken)
       localStorage.setItem('token', res.token)
       localStorage.setItem('user', JSON.stringify(res.user))
     } catch (err) {

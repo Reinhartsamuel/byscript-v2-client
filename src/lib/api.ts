@@ -36,7 +36,7 @@ async function fetchWithAuth(url: string, options: RequestInit = {}) {
   return res
 }
 
-export async function loginWithFirebaseToken(idToken: string) {
+export async function loginToBackendWithFirebaseToken(idToken: string) {
   const res = await fetch(`${BASE_URL}/user/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
