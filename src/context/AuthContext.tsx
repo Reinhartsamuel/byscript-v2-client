@@ -32,7 +32,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false)
       if (firebaseUser) {
         const idToken = await firebaseUser.getIdToken()
-        console.log('getting fb_id_token:::::::::', idToken)
         setSharedAuthCookie(idToken)
       } else {
         clearSharedAuthCookie()

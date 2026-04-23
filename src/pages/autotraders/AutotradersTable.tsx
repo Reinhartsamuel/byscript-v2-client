@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify'
 import { AutotraderListRow } from '@/data/mockData'
 import { updateAutotraderStatus } from '@/lib/api'
 import { darkToast } from '@/components/DarkToast'
+import { getExchangeThumbnail } from '@/constants/exchanges'
 
 interface AutotradersTableProps {
   data: AutotraderListRow[]
@@ -57,15 +58,18 @@ export default function AutotradersTable({ data }: AutotradersTableProps) {
 
       {/* Rows */}
       <div className="flex flex-col">
-        {paginatedData.map((row, i) => (
-          <div
-            key={row.id}
-            className="grid py-3"
-            style={{
-              gridTemplateColumns: '0.8fr 1.2fr 0.9fr 0.9fr 1fr 0.8fr 0.8fr 0.7fr 0.7fr 0.7fr',
-              borderTop: i > 0 ? '1px solid var(--color-border-subtle)' : 'none',
-            }}
-          >
+        {paginatedData.map((row, i) => {
+          const exchangeThumbnail = getExchangeThumbnail(row.exchange)
+
+          return (
+            <div
+              key={row.id}
+              className="grid py-3"
+              style={{
+                gridTemplateColumns: '0.8fr 1.2fr 0.9fr 0.9fr 1fr 0.8fr 0.8fr 0.7fr 0.7fr 0.7fr',
+                borderTop: i > 0 ? '1px solid var(--color-border-subtle)' : 'none',
+              }}
+            >
             {/* Status */}
             <span className={row.status === 'Stopped' ? 'badge-red' : 'badge-green'}>
               {row.status}
@@ -78,7 +82,16 @@ export default function AutotradersTable({ data }: AutotradersTableProps) {
             <span className="text-primary text-sm">{row.pair}</span>
 
             {/* Exchange */}
-            <span className="text-primary text-sm">{row.exchange}</span>
+            <div className="flex items-center gap-2 min-w-0">
+              {exchangeThumbnail ? (
+                <img
+                  src={exchangeThumbnail}
+                  alt={row.exchange}
+                  className="w-5 h-5 rounded-sm object-contain shrink-0"
+                />
+              ) : null}
+              <span className="text-primary text-sm truncate">{row.exchange}</span>
+            </div>
 
             {/* Capital */}
             <span className="text-primary text-sm text-right">${row.capital.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -130,7 +143,8 @@ export default function AutotradersTable({ data }: AutotradersTableProps) {
               </button>
             </div>
           </div>
-        ))}
+          )
+        })}
       </div>
 
       {/* Pagination */}

@@ -3,37 +3,7 @@ import { X, Loader2, Copy, Check } from 'lucide-react'
 import { registerExchangeAccount } from '@/lib/api'
 import { ToastContainer } from 'react-toastify';
 import { darkToast } from './DarkToast';
-
-export const exchanges = [
-  {
-    exchange_name: 'GATE',
-    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/60/large/Frame_1.png?1747795534',
-  },
-  {
-    exchange_name: 'OKX',
-    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/96/large/WeChat_Image_20220117220452.png?1706864283',
-  },
-  {
-    exchange_name: 'HYPERLIQUID',
-    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/1571/large/PFP.png?1714470912',
-  },
-  {
-    exchange_name: 'TOKOCRYPTO',
-    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/501/large/toko.png?1706864476',
-  },
-  {
-    exchange_name: 'BITGET',
-    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/540/large/2023-07-25_21.47.43.jpg?1706864507',
-  },
-  {
-    exchange_name: 'MEXC',
-    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/409/large/logo_new.png?1743600043',
-  },
-  {
-    exchange_name: 'BITMART',
-    exchange_thumbnail: 'https://assets.coingecko.com/markets/images/239/large/Bitmart.png?1706864341',
-  },
-];
+import { EXCHANGES } from '@/constants/exchanges'
 
 interface AddAccountModalProps {
   open: boolean
@@ -166,7 +136,7 @@ export default function AddAccountModal({ open, onClose }: AddAccountModalProps)
         <div className="flex flex-col gap-2">
           <label className="text-secondary text-xs uppercase tracking-wide">Select Exchange</label>
           <div className="grid grid-cols-2 gap-2">
-            {exchanges.map((ex) => {
+            {EXCHANGES.map((ex) => {
               const isSelected = exchange === ex.exchange_name;
               return (
                 <button

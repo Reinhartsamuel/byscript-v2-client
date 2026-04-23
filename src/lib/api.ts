@@ -95,6 +95,7 @@ const authHeaders = () => ({
   'Authorization': `Bearer ${localStorage.getItem('token')}`,
 })
 
+//TODO: add pagination
 export async function getAutotraders() {
   const res = await fetchWithAuth(`${BASE_URL}/user/autotraders`, { headers: authHeaders() })
   const data = await res.json();
@@ -102,28 +103,187 @@ export async function getAutotraders() {
   return data;
 }
 
+export interface TradingPlanPair {
+  id: number;
+  trading_plan_id: number;
+  base_asset: string;
+  quote_asset: string;
+  symbol: string;
+}
+
+export interface TradingPlan {
+  id: number;
+  owner_user_id: number;
+  name: string;
+  description: string | null;
+  strategy: string | null;
+  visibility: string | null;
+  total_followers: number | null;
+  pnl_30d: string | null;
+  max_dd: string | null;
+  sharpe: string | null;
+  created_at: string | null;
+  is_active: boolean;
+  pairs: TradingPlanPair[];
+}
+
+export async function getMyTradingPlans() {
+  const res = await fetchWithAuth(`${BASE_URL}/user/trading-plans`, {
+    method: 'GET',
+    headers: authHeaders(),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`)
+  return data as { data: TradingPlan[] }
+}
+
 export async function getTradingPlans() {
-  const res = await fetchWithAuth(`${BASE_URL}/user/trading-plans`, { headers: authHeaders() })
+  const [userPlansRes, publicPlansRes] = await Promise.all([
+    fetchWithAuth(`${BASE_URL}/user/trading-plans`, { headers: authHeaders() }),
+    fetchWithAuth(
+      `${BASE_URL}/trading-plans?visibility=PUBLIC&limit=100&sort_by=created_at&sort_order=desc`,
+      { headers: authHeaders() }
+    ),
+  ])
+
+  const userPlansData = await userPlansRes.json()
+  const publicPlansData = await publicPlansRes.json()
+
+  if (!userPlansRes.ok) {
+    throw new Error(userPlansData.message || `Error: ${userPlansRes.statusText}`)
+  }
+
+  if (!publicPlansRes.ok) {
+    throw new Error(publicPlansData.message || `Error: ${publicPlansRes.statusText}`)
+  }
+
+  const userPlans = (userPlansData?.data || []) as TradingPlan[]
+  const publicPlans = (publicPlansData?.data || []) as TradingPlan[]
+
+  const mergedById = new Map<number, TradingPlan>()
+  for (const plan of publicPlans) mergedById.set(plan.id, plan)
+  for (const plan of userPlans) mergedById.set(plan.id, plan)
+
+  return { data: Array.from(mergedById.values()) } as { data: TradingPlan[] }
+}
+
+export async function queryTradingPlans(params: {
+  visibility?: 'PRIVATE' | 'UNLISTED' | 'PUBLIC';
+  limit?: number;
+  offset?: number;
+  sort_by?: 'created_at' | 'total_followers' | 'name' | 'pnl_30d' | 'sharpe';
+  sort_order?: 'asc' | 'desc';
+  is_active?: boolean;
+} = {}) {
+  const query = new URLSearchParams()
+  if (params.visibility) query.set('visibility', params.visibility)
+  if (params.limit != null) query.set('limit', String(params.limit))
+  if (params.offset != null) query.set('offset', String(params.offset))
+  if (params.sort_by) query.set('sort_by', params.sort_by)
+  if (params.sort_order) query.set('sort_order', params.sort_order)
+  if (params.is_active != null) query.set('is_active', String(params.is_active))
+
+  const res = await fetchWithAuth(`${BASE_URL}/trading-plans?${query.toString()}`, {
+    method: 'GET',
+    headers: authHeaders(),
+  })
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
+  return data as { data: TradingPlan[]; pagination?: { total: number; limit: number; offset: number; has_more: boolean } };
+}
+
+export async function getTradingPlanById(id: string) {
+  const res = await fetchWithAuth(`${BASE_URL}/trading-plans/${id}/with-pairs`, {
+    method: 'GET',
+    headers: authHeaders(),
+  })
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
   return data;
 }
 
 export async function createTradingPlan(payload: {
+  owner_user_id?: number;
   name: string;
   description?: string;
   strategy?: string;
   visibility?: string;
   pairs: { base_asset: string; quote_asset: string; symbol: string }[];
 }) {
-  const res = await fetchWithAuth(`${BASE_URL}/user/trading-plans`, {
+  let ownerUserId = payload.owner_user_id
+
+  if (ownerUserId == null) {
+    try {
+      const rawUser = localStorage.getItem('user')
+      const parsedUser = rawUser ? JSON.parse(rawUser) : null
+      const parsedId = Number(parsedUser?.id)
+      ownerUserId = Number.isFinite(parsedId) ? parsedId : undefined
+    } catch {
+      ownerUserId = undefined
+    }
+  }
+
+  if (ownerUserId == null) {
+    throw new Error('Unable to create trading plan: missing user id. Please log in again.')
+  }
+
+  const res = await fetchWithAuth(`${BASE_URL}/trading-plans`, {
     method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ ...payload, owner_user_id: ownerUserId }),
+  })
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
+  return data;
+}
+
+export async function updateTradingPlan(id: string, payload: {
+  name?: string;
+  description?: string;
+  strategy?: string;
+  visibility?: string;
+  is_active?: boolean;
+}) {
+  const res = await fetchWithAuth(`${BASE_URL}/trading-plans/${id}`, {
+    method: 'PATCH',
     headers: authHeaders(),
     body: JSON.stringify(payload),
   })
   const data = await res.json();
   if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
   return data;
+}
+
+export async function deleteTradingPlan(id: string) {
+  const res = await fetchWithAuth(`${BASE_URL}/trading-plans/${id}`, {
+    method: 'DELETE',
+    headers: authHeaders(),
+  })
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
+  return data;
+}
+
+export async function createTradingPlanKey(id: string) {
+  const res = await fetchWithAuth(`${BASE_URL}/user/trading-plans/${id}/keys`, {
+    method: 'POST',
+    headers: authHeaders(),
+  })
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || `Error: ${res.statusText}`);
+  return data as {
+    data: {
+      id: number;
+      trading_plan_id: number;
+      rate_limit: number;
+      is_active: boolean;
+      created_at: string | null;
+      key_id: number;
+      key: string;
+      secret: string;
+    };
+    note?: string;
+  };
 }
 
 export async function deleteAutotrader(id: string) {

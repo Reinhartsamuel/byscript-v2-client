@@ -1,9 +1,10 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useRef, useEffect, useMemo } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ChevronDown, X, Check, Plus, Trash2 } from 'lucide-react'
 import { useAddAccountModalStore } from '@/store/index'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { getAccounts, getTradingPlans, createTradingPlan, createAutotraders } from '@/lib/api'
+import { getExchangeThumbnail } from '@/constants/exchanges'
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -13,6 +14,7 @@ interface ExchangeAccount {
   subName: string
   value: number
   market: string
+  exchangeName: string
 }
 
 interface TradingPlan {
@@ -51,6 +53,7 @@ function useExchangeAccounts() {
         subName: row.subName || row.exchange_user_id || '',
         value: Number(row.value) || 0,
         market: (row.market || 'spot').toLowerCase(),
+        exchangeName: row.exchange_title || row.name || '',
       }))
     },
   })
@@ -82,6 +85,7 @@ function ExchangeDropdown({
   const ref = useRef<HTMLDivElement>(null)
 
   const selected = accounts.find((a) => a.id === value)
+  const selectedExchangeThumbnail = selected ? getExchangeThumbnail(selected.exchangeName) : null
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -105,12 +109,20 @@ function ExchangeDropdown({
       >
         {selected ? (
           <div className="flex items-center gap-3">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white"
-              style={{ backgroundColor: 'var(--color-bg-card-hover)' }}
-            >
-              {selected.name[0]}
-            </div>
+            {selectedExchangeThumbnail ? (
+              <img
+                src={selectedExchangeThumbnail}
+                alt={selected.name}
+                className="w-8 h-8 rounded-lg object-contain shrink-0"
+              />
+            ) : (
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white"
+                style={{ backgroundColor: 'var(--color-bg-card-hover)' }}
+              >
+                {selected.name[0]}
+              </div>
+            )}
             <div className="text-left">
               <p className="text-primary text-sm font-medium">{selected.name}</p>
               <p className="text-muted text-xs">{selected.subName}</p>
@@ -127,26 +139,37 @@ function ExchangeDropdown({
           className="absolute left-0 right-0 top-full mt-1 rounded-lg z-30 overflow-hidden"
           style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border-subtle)' }}
         >
-          {accounts.map((acc) => (
-            <button
-              key={acc.id}
-              type="button"
-              onClick={() => { onChange(acc.id); setOpen(false) }}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
-            >
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0"
-                style={{ backgroundColor: 'var(--color-bg-card-hover)' }}
+          {accounts.map((acc) => {
+            const exchangeThumbnail = getExchangeThumbnail(acc.exchangeName)
+            return (
+              <button
+                key={acc.id}
+                type="button"
+                onClick={() => { onChange(acc.id); setOpen(false) }}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
               >
-                {acc.name[0]}
-              </div>
-              <div className="text-left flex-1">
-                <p className="text-primary text-sm font-medium">{acc.name}</p>
-                <p className="text-muted text-xs">{acc.subName}</p>
-              </div>
-              <span className="text-secondary text-xs">${acc.value.toLocaleString()}</span>
-            </button>
-          ))}
+                {exchangeThumbnail ? (
+                  <img
+                    src={exchangeThumbnail}
+                    alt={acc.name}
+                    className="w-8 h-8 rounded-lg object-contain shrink-0"
+                  />
+                ) : (
+                  <div
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0"
+                    style={{ backgroundColor: 'var(--color-bg-card-hover)' }}
+                  >
+                    {acc.name[0]}
+                  </div>
+                )}
+                <div className="text-left flex-1">
+                  <p className="text-primary text-sm font-medium">{acc.name}</p>
+                  <p className="text-muted text-xs">{acc.subName}</p>
+                </div>
+                <span className="text-secondary text-xs">${acc.value.toLocaleString()}</span>
+              </button>
+            )
+          })}
         </div>
       )}
     </div>
@@ -168,6 +191,11 @@ function TradingPlanDropdown({
   const ref = useRef<HTMLDivElement>(null)
 
   const selected = plans.find((p) => String(p.id) === value)
+  const sortedPlans = useMemo(() => {
+    const publicPlans = plans.filter((p) => p.visibility?.toUpperCase() === 'PUBLIC')
+    const privatePlans = plans.filter((p) => p.visibility?.toUpperCase() !== 'PUBLIC')
+    return [...publicPlans, ...privatePlans]
+  }, [plans])
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -198,25 +226,42 @@ function TradingPlanDropdown({
           className="absolute left-0 right-0 top-full mt-1 rounded-lg z-30 overflow-hidden"
           style={{ backgroundColor: 'var(--color-bg-card)', border: '1px solid var(--color-border-subtle)' }}
         >
-          {plans.map((plan) => (
-            <button
-              key={plan.id}
-              type="button"
-              onClick={() => { onChange(String(plan.id)); setOpen(false) }}
-              className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
-            >
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0"
-                style={{ backgroundColor: 'var(--color-bg-card-hover)' }}
+          {sortedPlans.map((plan) => {
+            const isPublic = plan.visibility?.toUpperCase() === 'PUBLIC'
+            return (
+              <button
+                key={plan.id}
+                type="button"
+                onClick={() => { onChange(String(plan.id)); setOpen(false) }}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-white/5 transition-colors"
               >
-                {plan.name[0]}
-              </div>
-              <div className="text-left">
-                <p className="text-primary text-sm font-medium">{plan.name}</p>
-                <p className="text-muted text-xs">{plan.pairs.length} pairs</p>
-              </div>
-            </button>
-          ))}
+                <div
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0"
+                  style={{ backgroundColor: 'var(--color-bg-card-hover)' }}
+                >
+                  {plan.name[0]}
+                </div>
+                <div className="text-left flex-1 min-w-0">
+                  <div className="flex items-center justify-between gap-2 w-full">
+                    <p className="text-primary text-sm font-medium truncate">{plan.name}</p>
+                    {isPublic && (
+                      <span
+                        className="text-[10px] font-semibold px-1.5 py-0.5 rounded uppercase tracking-wide shrink-0 ml-auto"
+                        style={{
+                          backgroundColor: '#FEF3C7',
+                          color: '#92400E',
+                          border: '1px solid #F59E0B',
+                        }}
+                      >
+                        ★ Public
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-muted text-xs">{(plan.pairs || []).length} pairs</p>
+                </div>
+              </button>
+            )
+          })}
         </div>
       )}
     </div>
@@ -301,12 +346,12 @@ function TradingPlanDrawer({
         <div className="flex flex-col gap-3">
           <p className="text-muted text-xs uppercase tracking-wide">Plan Basics</p>
           <div className="flex flex-col gap-1.5">
-            <label className="text-secondary text-xs">Plan name</label>
+            <label className="text-secondary text-xs">Trading Plan name</label>
             <input
               type="text"
               value={planName}
               onChange={(e) => setPlanName(e.target.value)}
-              placeholder="Plan name"
+              placeholder="Trading Plan name"
               className="text-primary text-sm px-3 py-2.5 rounded-lg"
               style={{
                 backgroundColor: 'var(--color-bg-page)',
@@ -624,6 +669,7 @@ function CheckItem({ done, label }: { done: boolean; label: string }) {
 
 export default function AutotraderConfigurator() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const queryClient = useQueryClient()
   const openAddAccount = useAddAccountModalStore((s) => s.openModal)
 
@@ -635,6 +681,17 @@ export default function AutotraderConfigurator() {
 
   const { data: accounts = [] } = useExchangeAccounts()
   const { data: tradingPlans = [] } = useTradingPlans()
+
+  useEffect(() => {
+    const planIdFromUrl = searchParams.get('trading_plan_id')
+    if (!planIdFromUrl || tradingPlanId) return
+
+    const matchedPlan = tradingPlans.find((plan) => String(plan.id) === planIdFromUrl)
+    if (matchedPlan) {
+      setTradingPlanId(planIdFromUrl)
+      setPairs([])
+    }
+  }, [searchParams, tradingPlans, tradingPlanId])
 
   const selectedAccount = accounts.find((a) => a.id === accountId)
   const selectedTradingPlan = tradingPlans.find((p) => String(p.id) === tradingPlanId)
@@ -794,7 +851,7 @@ export default function AutotraderConfigurator() {
                 className="text-xs font-semibold px-3 py-1.5 rounded-full transition-colors shrink-0"
                 style={{ border: '1px solid var(--color-border-subtle)', color: 'var(--color-text-primary)', backgroundColor: 'transparent' }}
               >
-                Create Trading Plan
+                Create Custom Trading Plan
               </button>
             </div>
             <TradingPlanDropdown
