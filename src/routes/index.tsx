@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import Dashboard from '@/pages/Dashboard'
@@ -19,7 +19,6 @@ export default function AppRoutes() {
       <Route path="/" element={<Landing />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<Layout />}>
-          <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="accounts" element={<Accounts />} />
           <Route path="autotraders" element={<Autotraders />} />
