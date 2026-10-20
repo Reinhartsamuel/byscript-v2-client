@@ -10,11 +10,13 @@ import TradeHistory from '@/pages/TradeHistory'
 import TradingPlans from '@/pages/TradingPlans'
 import TradingPlanDetail from '@/pages/TradingPlanDetail'
 import Login from '@/pages/Login'
+import Landing from '@/pages/Landing'
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/" element={<Landing />} />
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<Layout />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
