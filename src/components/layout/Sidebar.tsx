@@ -9,7 +9,6 @@ const NAV_ITEMS = [
   { to: '/autotraders', label: 'Autotraders', icon: Bot, external: false },
   { to: '/trade-history', label: 'Trade History', icon: History, external: false },
   { to: '/trading-plans', label: 'Trading Plans', icon: Layers, external: false },
-  { to: 'https://v2.byscript.io/screener', label: 'Screener', icon: Tv, external: true },
   { to: 'https://v2.byscript.io/chart', label: 'Chart', icon: LineChart, external: true },
 ]
 

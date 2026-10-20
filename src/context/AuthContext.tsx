@@ -46,14 +46,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('creating fb_id_token on sign in:::::::::', idToken)
     setSharedAuthCookie(idToken)
 
-    console.log('requesting screeners')
-    const res = await fetch('https://byscript-screener-backend-production.up.railway.app/screeners', {
-      headers: {
-        'Authorization': `Bearer ${idToken}`
-      }
-    })
-    const data = await res.json()
-    console.log('screeners', data)
     try {
       const res = await loginToBackendWithFirebaseToken(idToken)
       localStorage.setItem('token', res.token)
