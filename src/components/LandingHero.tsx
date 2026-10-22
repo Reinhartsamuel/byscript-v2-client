@@ -1,4 +1,3 @@
-import heroVideo from './assets/hero-bg.mp4';
 import './LandingHero.css';
 
 export default function LandingHero() {
@@ -28,9 +27,7 @@ export default function LandingHero() {
         </h1>
 
         <p className="hero__subhead">
-          <span className="hero__subhead-sentence">Connect&nbsp;your&nbsp;exchange.&nbsp;</span>
-          <span className="hero__subhead-sentence">Activate&nbsp;a&nbsp;proven&nbsp;strategy.&nbsp;</span>
-          <span className="hero__subhead-sentence">byScript&nbsp;executes&nbsp;the&nbsp;rest&nbsp;—&nbsp;reliably,&nbsp;24/7.</span>
+          Connect your exchange. Activate a proven strategy. byScript executes the rest — reliably, 24/7.
         </p>
 
         <div className="hero__actions">
@@ -50,18 +47,6 @@ export default function LandingHero() {
             </svg>
           </a>
         </div>
-      </div>
-
-      <div className="hero__video-field">
-        <video
-          className="hero__video"
-          src={heroVideo}
-          autoPlay
-          muted
-          loop
-          playsInline
-          aria-hidden="true"
-        />
       </div>
     </section>
   );

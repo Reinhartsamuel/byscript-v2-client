@@ -29,7 +29,6 @@
   height: 100dvh;
   min-height: 100vh;
   background: #01061a;
-  background-image: linear-gradient(90deg, #00061a 0%, #01071b 22%, #01071a 45%, #010718 62%, #010614 80%, #020511 100%);
   font-family: "Space Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -130,8 +129,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  flex: 0 0 auto;
-  margin-top: clamp(24 * var(--u), 82.98 * var(--u), 100vh);
+  flex: 1;
+  justify-content: center;
+  margin-top: 0;
+  width: 100%;
+  padding: 0 24px;
 }
 
 .hero__headline {
@@ -260,37 +262,6 @@
   transform: translateY(0.12em);
 }
 
-.hero__video-field {
-  position: relative;
-  flex: 318.68 1 0;
-  min-height: 160 * var(--u);
-  width: 100%;
-  container-type: size;
-  margin-top: auto;
-  overflow: hidden;
-  animation: hero-fade-in 1.2s ease-out;
-}
-
-.hero__video {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: auto;
-  height: max(100cqw * 971 / 1619, calc((100cqh + 36.4 * var(--u)) / 0.49537 + 1px));
-  max-width: none;
-  pointer-events: none;
-  object-fit: cover;
-  mask-image: linear-gradient(to bottom, transparent 0%, transparent 4%, black 4%, black 100%);
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, transparent 4%, black 4%, black 100%);
-}
-
-@supports not (container-type: size) {
-  .hero__video {
-    height: max(60vw, 105vh);
-  }
-}
-
 @keyframes hero-line-reveal {
   to {
     transform: translateY(0);
@@ -326,8 +297,7 @@
   .hero__link {
     animation: hero-fade-in 700ms ease-out backwards;
   }
-  .hero__masthead,
-  .hero__video-field {
+  .hero__masthead {
     animation: hero-fade-in 1.2s ease-out;
   }
   .hero__link:hover .hero__link-arrow {
@@ -342,14 +312,6 @@
   @supports not (height: 100dvh) {
     .hero {
       --u: min(100vh / 800, 1px, max(100vw / 1280, 100vh / 1190, 0.86px));
-    }
-  }
-  .hero__video-field {
-    max-height: 48dvh;
-  }
-  @supports not (height: 100dvh) {
-    .hero__video-field {
-      max-height: 48vh;
     }
   }
   .hero__nav-link {
@@ -373,27 +335,30 @@
     }
   }
   .hero__masthead {
-    padding-top: calc(env(safe-area-inset-top, 0px) + 24 * var(--u));
+    padding-top: calc(env(safe-area-inset-top, 0px) + 36px);
   }
   .hero__hairline {
     width: min(284 * var(--u), calc(100vw - 48px));
   }
+  .hero__nav {
+    width: min(284 * var(--u), calc(100vw - 48px));
+  }
   .hero__headline {
-    font-size: max(26px, min(68 * var(--u), calc((100vw - 48px) / 8.235)));
+    font-size: max(22px, min(68 * var(--u), calc((100vw - 48px) / 10.5)));
     white-space: nowrap;
   }
   .hero__subhead {
-    font-size: min(21 * var(--u), 3.345vw);
-    min-font-size: 16px;
-    line-height: 1.4;
-    margin-top: 18 * var(--u);
-    padding: 0 24px;
+    font-size: max(15px, min(21 * var(--u), 3.9vw));
+    line-height: 1.5;
+    margin-top: calc(20 * var(--u));
+    max-width: 26rem;
+    padding: 0;
   }
   .hero__button {
     width: min(216 * var(--u), calc(100vw - 48px));
   }
   .hero__link {
-    margin-top: 16 * var(--u);
+    margin-top: calc(20 * var(--u));
   }
   .hero__actions {
     width: 100%;
